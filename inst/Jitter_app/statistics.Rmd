@@ -1,0 +1,13 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+SDSdata::sds_setup()
+```
+
+This is where the reported statistics (if any) will be displayed. 
+
+We're going to have to find out how to integrate the calculated statistics with this report.
+
+* Maybe this should be knitted internally with values set for whatever.
+
+

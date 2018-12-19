@@ -1,0 +1,10 @@
+## Basic commands used in this app
+
+```{r include = FALSE}
+SDSdata::sds_setup()
+```
+
+```{r} 
+NHANES %>%
+  gf_jitter(Height ~ Gender, width = 0.2, height = 0, alpha = 0.1)
+```

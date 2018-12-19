@@ -1,0 +1,21 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+SDSdata::sds_setup()
+```
+
+## Using the App
+
+The point of this app is ...
+
+```{r}
+NHANES %>% 
+  gf_point(Weight ~ Age, data = .)
+```
+
+```{r}
+NHANES %>% 
+  gf_point(Weight ~ Age, data = ., color = ~ Gender, alpha = 0.3)
+```
+
+
