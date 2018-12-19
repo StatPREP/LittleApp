@@ -30,7 +30,9 @@ shinyApp(
           sliderInput("jitter_height", "Jitter height",
                       min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
           sliderInput("jitter_alpha",  "Transparency",
-                      min = 0, max = 1, value = 1) %>% tighten(bottom = -10)
+                      min = 0, max = 1, value = 1) %>% tighten(bottom = -10),
+          checkboxInput("violin", "Show violin plot") %>%
+            tighten(bottom = -10)
       ),
       LA_inference(6)
     ),
@@ -79,10 +81,16 @@ shinyApp(
 
     # Function to get a sample, resample trial, sets of trials
     get_a_sample <- function(size, stratify, strat_var, frame){
-      Tmp <- if (stratify) frame %>% group_by(!!as.name(strat_var))
-             else frame
-
-      Tmp %>% sample_n(size = size)
+      
+      if (stratify) {
+        # need to resample in case there are not enough
+        # cases in any given stratum
+        frame %>% group_by(!!as.name(strat_var)) %>%
+          sample_n(size = size, replace = TRUE)
+       }  else {
+         frame %>% sample_n(size = size)
+       }
+      
     }
     get_sample <- reactive({
       input$new_sample     # for the dependency
@@ -98,6 +106,15 @@ shinyApp(
                    the_data$frame)
     })
 
+    observe({
+      req(input$frame)
+      n_possible <- c(outer( c(1, 2, 5), c(10,100,1000,10000), FUN = "*"))
+      n_possible <- c(5, n_possible[n_possible <= nrow(the_data$frame)], 
+                      nrow(req(the_data$frame)))
+      updateSelectInput(session, "samp_size", 
+                        choices = n_possible, selected = 20)
+    })
+    
     get_resample <- reactive({
       cat("New resampling trial.\n")
       the_samp <- get_sample()
@@ -170,12 +187,11 @@ cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_sta
 
     # Choose the variables
     select1 <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
-    select2 <- function(x) x  %>% filter(numeric, n_levels > 20) %>% .$vname
+    select2 <- function(x) x # everything %>% filter(numeric, n_levels > 20) %>% .$vname
     observe({
       # output$debug_table <- renderTable(the_data$types)
       vnames1 <- select2(the_data$types)
       vnames2 <- select1(the_data$types)
-      cat("Types has {nrow(the_data$types)} rows\n")
       updateSelectInput(session, "var1", choices =  vnames1)
       updateSelectInput(session, "var2", choices =  vnames2,
                         selected = vnames2[pmin(2, length(vnames2))])
@@ -192,6 +208,7 @@ cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_sta
                    width = input$jitter_width,
                    height = input$jitter_height,
                    alpha = input$jitter_alpha)
+      if (input$violin) P <- P %>% gf_violin(alpha = 0.2, fill = "blue")
 
       return(P)
     })
