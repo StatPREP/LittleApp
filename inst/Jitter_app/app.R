@@ -25,12 +25,14 @@ shinyApp(
       box(title = "Jitter controls", width = 6, background = "black",
           status = "primary", solidHeader = TRUE,
           collapsible = FALSE, collapsed = FALSE,
-          sliderInput("jitter_width",  "Jitter width",
+          conditionalPanel(
+            condition = "input.resample == true",
+            sliderInput("jitter_width",  "Jitter width",
                       min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
           sliderInput("jitter_height", "Jitter height",
                       min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
           sliderInput("jitter_alpha",  "Transparency",
-                      min = 0, max = 1, value = 1) %>% tighten(bottom = -10),
+                      min = 0, max = 1, value = 1) %>% tighten(bottom = -10)),
           checkboxInput("violin", "Show violin plot") %>%
             tighten(bottom = -10)
       ),
@@ -81,7 +83,7 @@ shinyApp(
 
     # Function to get a sample, resample trial, sets of trials
     get_a_sample <- function(size, stratify, strat_var, frame){
-      
+
       if (stratify) {
         # need to resample in case there are not enough
         # cases in any given stratum
@@ -90,7 +92,7 @@ shinyApp(
        }  else {
          frame %>% sample_n(size = size)
        }
-      
+
     }
     get_sample <- reactive({
       input$new_sample     # for the dependency
@@ -109,12 +111,19 @@ shinyApp(
     observe({
       req(input$frame)
       n_possible <- c(outer( c(1, 2, 5), c(10,100,1000,10000), FUN = "*"))
-      n_possible <- c(5, n_possible[n_possible <= nrow(the_data$frame)], 
+      n_possible <- n_possible[ n_possible != nrow(req(the_data$frame))]
+      n_possible <- c(5, n_possible[n_possible <= nrow(the_data$frame)],
                       nrow(req(the_data$frame)))
-      updateSelectInput(session, "samp_size", 
-                        choices = n_possible, selected = 20)
+      choices <- as.list(n_possible)
+      names_for_choices <- choices
+      names_for_choices[length(names_for_choices)] <- "Population"
+      names(choices) <- names_for_choices
+      cat(paste(names_for_choices, collapse = ", "))
+      names(choices)[length(choices)] <- "Population"
+      updateSelectInput(session, "samp_size",
+                        choices = choices, selected = 20)
     })
-    
+
     get_resample <- reactive({
       cat("New resampling trial.\n")
       the_samp <- get_sample()
