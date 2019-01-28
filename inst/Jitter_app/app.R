@@ -10,6 +10,7 @@ library(markdown)
 library(mosaic)
 library(ggformula)
 
+# App-specific controls
 jitter_controls <-
   box(title = "Jitter controls", width = 12, background = "black",
       status = "primary", solidHeader = TRUE,
@@ -24,22 +25,24 @@ jitter_controls <-
         tighten(bottom = -10)
   )
 
-UI <- dashboardPage(
-  dashboardHeader(
-    title = "Jittered point plots",
-    titleWidth = "90%"
-  ),
-  dashboardSidebar(
-    width = 350,
-    LA_data_source(6),
-    LA_variables_ui(6),
-    LA_sample_ui(6),
-    LA_inference(6),
-    jitter_controls
-  ),
+UI <- function(request) { # for bookmarking
+  dashboardPage(
+    dashboardHeader(
+      title = "Jittered point plots",
+      titleWidth = "90%"
+    ),
+    dashboardSidebar(
+      width = 350,
+      LA_data_source(6),
+      LA_variables_ui(6),
+      LA_sample_ui(6),
+      LA_inference(6),
+      jitter_controls
+    ),
 
-  LA_body()
-)
+    LA_body()
+  )
+}
 
 SERVER <- function(input, output, session) {
     the_data <- reactiveValues()
@@ -99,5 +102,5 @@ SERVER <- function(input, output, session) {
     })
   }
 
-shinyApp(UI, SERVER)
+shinyApp(UI, SERVER, enableBookmarking = "server")
 
