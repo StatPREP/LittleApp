@@ -17,7 +17,9 @@ LA_var_types <- function(.data) {
   }
   Tmp <- lapply(.data, f)
 
-  bind_cols(vname = names(Tmp), bind_rows(Tmp))
+  res <- bind_cols(vname = names(Tmp), bind_rows(Tmp))
+
+  res
 }
 
 

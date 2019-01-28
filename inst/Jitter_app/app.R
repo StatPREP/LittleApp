@@ -10,148 +10,52 @@ library(markdown)
 library(mosaic)
 library(ggformula)
 
+jitter_controls <-
+  box(title = "Jitter controls", width = 12, background = "black",
+      status = "primary", solidHeader = TRUE,
+      collapsible = FALSE, collapsed = FALSE,
+      sliderInput("jitter_width",  "Jitter width",
+                  min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
+      sliderInput("jitter_height", "Jitter height",
+                  min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
+      sliderInput("jitter_alpha",  "Transparency",
+                  min = 0, max = 1, value = 1) %>% tighten(bottom = -10),
+      checkboxInput("violin", "Show violin plot") %>%
+        tighten(bottom = -10)
+  )
 
-
-
-shinyApp(
-  ui = dashboardPage(
-    dashboardHeader(
-      title = "Jittered point plots",
-      titleWidth = "90%"
-    ),
-    dashboardSidebar(
-      width = 350,
-      LA_data_ui(6),
-      box(title = "Jitter controls", width = 6, background = "black",
-          status = "primary", solidHeader = TRUE,
-          collapsible = FALSE, collapsed = FALSE,
-          conditionalPanel(
-            condition = "input.resample == true",
-            sliderInput("jitter_width",  "Jitter width",
-                      min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
-          sliderInput("jitter_height", "Jitter height",
-                      min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
-          sliderInput("jitter_alpha",  "Transparency",
-                      min = 0, max = 1, value = 1) %>% tighten(bottom = -10)),
-          checkboxInput("violin", "Show violin plot") %>%
-            tighten(bottom = -10)
-      ),
-      LA_inference(6)
-    ),
-    dashboardBody(
-      plotOutput("main_plot", height = "400px"),
-      HTML("<br>"),
-      tabBox(
-        title = "Info", width = 12,
-        # The id lets us use input$tabset1 on the server to find the current tab
-        id = "tabset1", height = "100px",
-        tabPanel("Codebook", htmlOutput("codebook")),
-        tabPanel("Statistics", htmlOutput("statistics")),
-        tabPanel("Explain", htmlOutput("explain")),
-        tabPanel("R commands", htmlOutput("rcode")),
-        tabPanel("Debug",
-                 textOutput("debug_text"),
-                 #plotOutput("debug_plot"),
-                 tableOutput("debug_table"))
-      ),
-      tags$head(tags$style(HTML('
-      .main-header .logo {
-        font-family: "Georgia", Times, "Times New Roman", serif;
-        font-weight: bold;
-        font-size: 24px;
-      }
-      section.sidebar .shiny-input-container {
-          /* Proper spacing around inputs. */
-          padding: 1px 1px 1px 1px;
-         /* Wrap content (important for inline inputs). */
-         white-space: no-wrap;
-}
-
-      .shiny_input_container .control-label {
-
-      }
-    ')))
-    )
+UI <- dashboardPage(
+  dashboardHeader(
+    title = "Jittered point plots",
+    titleWidth = "90%"
   ),
-  server = function(input, output, session) {
+  dashboardSidebar(
+    width = 350,
+    LA_data_source(6),
+    LA_variables_ui(6),
+    LA_sample_ui(6),
+    LA_inference(6),
+    jitter_controls
+  ),
+
+  LA_body()
+)
+
+SERVER <- function(input, output, session) {
     the_data <- reactiveValues()
     app_state <- reactiveValues(n_trials = 0, Trials = data.frame())
 
+    # App-specific selection of variables
 
 
-    LA_data_server(input, output, session, the_data, app_state)
+    # Choose the variables
+    select_x <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
+    select_y <- function(x) x %>% .$vname
+    select_z <- function(x) character(0) # no covariates possible
 
-    # Function to get a sample, resample trial, sets of trials
-    get_a_sample <- function(size, stratify, strat_var, frame){
-
-      if (stratify) {
-        # need to resample in case there are not enough
-        # cases in any given stratum
-        frame %>% group_by(!!as.name(strat_var)) %>%
-          sample_n(size = size, replace = TRUE)
-       }  else {
-         frame %>% sample_n(size = size)
-       }
-
-    }
-    get_sample <- reactive({
-      input$new_sample     # for the dependency
-      input$var1
-      input$var2
-      input$covar
-      # remove the resampling trials
-      isolate(app_state$n_trials <<- 0)
-      req(input$samp_size) # for the dependency
-      get_a_sample(as.numeric(req(input$samp_size)),
-                   input$stratify,
-                   input$var2,
-                   the_data$frame)
-    })
-
-    observe({
-      req(input$frame)
-      n_possible <- c(outer( c(1, 2, 5), c(10,100,1000,10000), FUN = "*"))
-      n_possible <- n_possible[ n_possible != nrow(req(the_data$frame))]
-      n_possible <- c(5, n_possible[n_possible <= nrow(the_data$frame)],
-                      nrow(req(the_data$frame)))
-      choices <- as.list(n_possible)
-      names_for_choices <- choices
-      names_for_choices[length(names_for_choices)] <- "Population"
-      names(choices) <- names_for_choices
-      cat(paste(names_for_choices, collapse = ", "))
-      names(choices)[length(choices)] <- "Population"
-      updateSelectInput(session, "samp_size",
-                        choices = choices, selected = 20)
-    })
-
-    get_resample <- reactive({
-      cat("New resampling trial.\n")
-      the_samp <- get_sample()
-      if (input$stratify) {  #resample within groups
-        n_groups <- # how many stratification groups
-          length(unique(the_samp[[input$var2]]))
-        the_samp %>%
-          group_by(!!as.name(input$var2)) %>%
-          sample_n(size = nrow(the_samp) / n_groups, replace = TRUE)
-      } else {
-        the_samp %>% sample_n(size = nrow(the_samp), replace = TRUE)
-      }
-    })
-    get_trial <- reactive({
-      Tmp <-
-        if (input$resample) get_resample()
-      else get_a_sample(as.numeric(input$samp_size),
-                        input$stratify,
-                        input$var2,
-                        the_data$frame)
-
-
-      # Randomization as needed
-      if (input$shuffle) Tmp[[input$var1]] <- shuffle(Tmp[[input$var1]])
-
-      Tmp
-    })
-
+    # Reactives and observers used throughout the various Little Apps
+    LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
+    LA_standard_reactives(input, output, session, the_data, app_state)
 
     output$debug_text <- renderText({
       input$new_trial
@@ -163,52 +67,11 @@ shinyApp(
       glue::glue("{req(app_state$n_trials)} trials taken so {nrow(app_state$Trials)} rows of randomization trial data.\n")
     })
 
-    get_all_trials <- reactive({ app_state$Trials })
-    # delete all trials  when new sample or accumulate_trials is turned  off
-    #observeEvent(get_sample(), zero_out_trials())
-    observeEvent({c(input$resample, input$shuffle); get_sample()}, zero_out_trials())
-    #observeEvent(input$shuffle, zero_out_trials())
-    observeEvent(input$accumulate_trials,
-                 if (!input$accumulate_trials) zero_out_trials())
 
-    zero_out_trials <- reactive({
-      app_state$n_trials <<- 0
-      app_state$Trials <<- data.frame()
-      app_state$Trials
-    })
-
-    observeEvent(input$new_trial, {
-      if (isolate(input$accumulate_trials)) {
-        isolate(app_state$n_trials <<- app_state$n_trials + 1)
-        app_state$Trials <<- get_trial() %>%
-          mutate(.trial = isolate(app_state$n_trials)) %>%
-          bind_rows(app_state$Trials, .)
-      } else {
-        isolate(app_state$n_trials <<- 1 )
-        app_state$Trials <<- get_trial() %>%
-          mutate(.trial = isolate(app_state$n_trials))
-      }
-
-      cat(isolate(app_state$n_trials), "trials run\n")
-
-cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_state$Trials)), "rows\n"))
-    })
-
-    # Choose the variables
-    select1 <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
-    select2 <- function(x) x # everything %>% filter(numeric, n_levels > 20) %>% .$vname
-    observe({
-      # output$debug_table <- renderTable(the_data$types)
-      vnames1 <- select2(the_data$types)
-      vnames2 <- select1(the_data$types)
-      updateSelectInput(session, "var1", choices =  vnames1)
-      updateSelectInput(session, "var2", choices =  vnames2,
-                        selected = vnames2[pmin(2, length(vnames2))])
-    })
 
     construct_plot <- reactive({
-      req(input$var1, input$var2)
-      the_formula <- as.formula(glue::glue("{input$var1} ~ {input$var2}"))
+      req(input$var_y, input$var_x)
+      the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
       # The next line gets all the accumulated randomization trials.
       Trials <- get_all_trials()
       P <-
@@ -235,4 +98,6 @@ cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_sta
       HTML(includeHTML("statistics.html"))
     })
   }
-)
+
+shinyApp(UI, SERVER)
+

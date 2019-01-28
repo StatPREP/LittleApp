@@ -10,3 +10,5 @@ This repository contains a proposed re-factoring of the Little Apps, based on fe
     
 Rather than using a new branch in the original LittleApps repository, this is an entirely new repository. That makes it easier to look at the original for adopting bits from it to this new re-factoring.
     
+    
+Claus Wilke, HOPS, graphics from his https://github.com/wilkelab/ungeviz
