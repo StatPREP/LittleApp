@@ -25,7 +25,7 @@ jitter_controls <-
         tighten(bottom = -10)
   )
 
-UI <- function(request) { # for bookmarking
+UI <- function(request) { #for bookmarking
   dashboardPage(
     dashboardHeader(
       title = "Jittered point plots",

@@ -6,6 +6,11 @@
 \usage{
 LA_data_source(width = 12, collapsed = TRUE)
 }
+\arguments{
+\item{width}{1-12 twitter bootstrap width of control}
+
+\item{collapsed}{Logical indicating whether to display box as collapsed initially}
+}
 \description{
 Basic control blocks for Little Apps
 }
