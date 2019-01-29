@@ -49,14 +49,17 @@ LA_read_data <- function(data_name = "Health", package = "littleapp2") {
 }
 
 #` @export
-get_a_sample <- function(size, stratify, strat_var, frame){
-  if (stratify) {
+get_a_sample <- function(size, stratify, strat_var, vars, frame){
+  frame <- frame[names(frame) %in% vars] %>% na.omit()
+  F <- if (stratify) {
     # need to resample in case there are not enough
     # cases in any given stratum
     frame %>% group_by(!!as.name(strat_var)) %>%
       sample_n(size = size, replace = TRUE)
   }  else {
-    frame %>% sample_n(size = size)
+    frame %>% sample_n(size = pmin(nrow(frame), size))
   }
+
+  F
 
 }

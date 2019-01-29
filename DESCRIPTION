@@ -15,4 +15,4 @@ Imports:
     shiny, 
     shinydashboard,
     mosaic, mosaicData, dplyr, ggformula,
-    tools
+    tools, tidyr

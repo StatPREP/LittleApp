@@ -15,6 +15,7 @@ LA_standard_reactives <-
       get_a_sample(as.numeric(req(input$samp_size)),
                    input$stratify,
                    input$var_x,
+                   c(input$var_y, input$var_x, input$covar),
                    the_data$frame)
     })
 
@@ -39,6 +40,7 @@ LA_standard_reactives <-
       else get_a_sample(as.numeric(input$samp_size),
                         input$stratify,
                         input$var_x,
+                        c(input$var_y, input$var_x, input$covar),
                         the_data$frame)
 
 
