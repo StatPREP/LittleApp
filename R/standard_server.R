@@ -95,6 +95,7 @@ LA_standard_observers <-
       updateSelectInput(session, "var_x", choices =  vnames_x,
                         selected = vnames_x[pmin(2, length(vnames_x))])
       updateSelectInput(session, "covar", choices =  vnames_z[!vnames_z %in% c(vnames_x, vnames_y)])
+      the_data$initialized <<- TRUE
           })
 
 

@@ -14,9 +14,9 @@ LA_data_source <- function(width = 12, collapsed = TRUE) {
 LA_variables_ui <- function(width = 12, collapsed = TRUE) {
   box(title = "Variables", width = width, status = "primary", solidHeader = FALSE,
       collapsible = TRUE, collapsed = collapsed, background = "black",
-      tighten(selectizeInput("var_y", "Response", c("a", "b"))),
-      tighten(selectizeInput("var_x", "Explanatory", c("a", "b"))),
-      tighten(selectizeInput("covar", "Covariates", c("a", "b"), multiple = TRUE))
+      tighten(selectizeInput("var_y", "Response", choices = list("bogus"  = ""))),
+      tighten(selectizeInput("var_x", "Explanatory", choices = list("bogus"))),
+      tighten(selectizeInput("covar", "Covariates", choices = list("bogus"), multiple = TRUE))
   )
 }
 #' @export

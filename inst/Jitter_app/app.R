@@ -74,6 +74,8 @@ SERVER <- function(input, output, session) {
 
     construct_plot <- reactive({
       req(input$var_y, input$var_x)
+      req(the_data$initialized)
+
       the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
       # The next line gets all the accumulated randomization trials.
       Trials <- get_all_trials()
