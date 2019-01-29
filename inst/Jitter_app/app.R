@@ -92,15 +92,15 @@ SERVER <- function(input, output, session) {
       construct_plot()
     })
     output$rcode <- renderText({
-      HTML(includeHTML("r-commands.html"))
+      #HTML(includeHTML("r-commands.html"))
     })
     output$explain <- renderText({
-      HTML(includeHTML("explain.html"))
+      #HTML(includeHTML("explain.html"))
     })
     output$statistics <- renderText({
       HTML(includeHTML("statistics.html"))
     })
   }
 
-shinyApp(UI, SERVER, enableBookmarking = "server")
+shinyApp(UI, SERVER)  #, enableBookmarking = "server")
 
