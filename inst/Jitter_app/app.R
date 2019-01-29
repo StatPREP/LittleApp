@@ -36,8 +36,9 @@ UI <- function(request) { #for bookmarking
       LA_data_source(6),
       LA_variables_ui(6),
       LA_sample_ui(6),
-      LA_inference(6),
+      # LA_inference(6),
       jitter_controls
+      #, bookmarkButton()
     ),
 
     LA_body()
@@ -70,23 +71,26 @@ SERVER <- function(input, output, session) {
       glue::glue("{req(app_state$n_trials)} trials taken so {nrow(app_state$Trials)} rows of randomization trial data.\n")
     })
 
-
-
     construct_plot <- reactive({
       req(input$var_y, input$var_x)
       req(the_data$initialized)
 
+      # Make the plot
       the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
-      # The next line gets all the accumulated randomization trials.
-      Trials <- get_all_trials()
-      P <-
-        get_sample()  %>%
-        gf_jitter( the_formula, seed = 101,
-                   width = input$jitter_width,
-                   height = input$jitter_height,
-                   alpha = input$jitter_alpha)
-      if (input$violin) P <- P %>% gf_violin(alpha = 0.2, fill = "blue")
-
+      plot_data  <- get_sample()
+      if (input$var_y %in% names(plot_data)  && input$var_y %in% names(plot_data))  {
+        # The next line gets all the accumulated randomization trials.
+        Trials <- get_all_trials()
+        P <-
+          get_sample()  %>%
+          gf_jitter( the_formula, seed = 101,
+                     width = input$jitter_width,
+                     height = input$jitter_height,
+                     alpha = input$jitter_alpha)
+        if (input$violin) P <- P %>% gf_violin(alpha = 0.2, fill = "blue")
+      } else {
+        P <- gf_text(1 ~ 1, label = "New data set arriving ...") %>% gf_theme(theme_void())
+      }
       return(P)
     })
     output$main_plot <- renderPlot({ construct_plot() })
@@ -94,15 +98,15 @@ SERVER <- function(input, output, session) {
       construct_plot()
     })
     output$rcode <- renderText({
-      #HTML(includeHTML("r-commands.html"))
+      HTML(includeHTML("r-commands.html"))
     })
     output$explain <- renderText({
-      #HTML(includeHTML("explain.html"))
+      HTML(includeHTML("explain.html"))
     })
     output$statistics <- renderText({
       HTML(includeHTML("statistics.html"))
     })
   }
 
-shinyApp(UI, SERVER)  #, enableBookmarking = "server")
+shinyApp(UI, SERVER, enableBookmarking = "url")
 

@@ -3,18 +3,7 @@
 #' @export
 LA_standard_reactives <-
   function(input, output, session, the_data, app_state) {
-    get_a_sample <<- function(size, stratify, strat_var, frame){
 
-      if (stratify) {
-        # need to resample in case there are not enough
-        # cases in any given stratum
-        frame %>% group_by(!!as.name(strat_var)) %>%
-          sample_n(size = size, replace = TRUE)
-      }  else {
-        frame %>% sample_n(size = size)
-      }
-
-    }
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       input$var_y
@@ -74,16 +63,21 @@ LA_standard_observers <-
     observe({
       tmp <- unlist(strsplit(input$frame, ":", fixed = TRUE))
       Tmp <- LA_read_data(data_name = tmp[1], package = tmp[2])
+
       the_data$frame <- Tmp$frame
       the_data$codebook <- Tmp$codebook
       the_data$description <- Tmp$overall
       the_data$types <- Tmp$types
 
-      description <- the_data$description
-      var_y_desc <- the_data$codebook[[isolate(input$var_y)]]
-      var_x_desc <- the_data$codebook[[isolate(input$var_x)]]
-      var_explain <- glue::glue("<ul><li>{input$var_y}:  {var_y_desc}</li><li>{input$var_x}:  {var_x_desc}</li></ul>")
-      output$codebook <- renderText({paste(description, var_explain)})
+      if (is.list(the_data$codebook)) { # use customized documentation
+        description <- the_data$description
+        var_y_desc <- the_data$codebook[[isolate(input$var_y)]]
+        var_x_desc <- the_data$codebook[[isolate(input$var_x)]]
+        var_explain <- glue::glue("<ul><li>{input$var_y}:  {var_y_desc}</li><li>{input$var_x}:  {var_x_desc}</li></ul>")
+        output$codebook <- renderText({paste(description, var_explain)})
+      } else {
+        output$codebook <- renderText({HTML(the_data$codebook)})
+      }
     })
 
     observe({
@@ -111,7 +105,7 @@ LA_standard_observers <-
       names(choices) <- names_for_choices
       names(choices)[length(choices)] <- "Population" # IS THIS REDUNDANT?
       updateSelectInput(session, "samp_size",
-                        choices = choices, selected = 20)
+                        choices = choices, selected = 200)
     })
 
     # delete all trials  when new sample or accumulate_trials is turned  off

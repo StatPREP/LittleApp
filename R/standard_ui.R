@@ -9,8 +9,10 @@ LA_data_source <- function(width = 12, collapsed = TRUE) {
       collapsible = TRUE, collapsed = collapsed,
       background = "black",
       selectInput("frame", "Data frame",
-                  choices = LA_available_data()) %>% tighten(top=0)
-      #bookmarkButton()
+                  choices = LA_available_data()) %>% tighten(top=0),
+      conditionalPanel(condition = "input.frame == 'Your own data'",
+                       textInput("URL", "URL", value = "")
+      )
       )
 }
 #' @export
