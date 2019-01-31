@@ -1,0 +1,78 @@
+### R commands used in the App
+
+```{r include = FALSE}
+library(mosaic)
+library(ggformula)
+```
+
+The basic graphic display shown in the app is a jittered point plot of a quantitative variable against a categorical variable. The `gf_point()` function in the `ggformula` package is used. As always, the layout of the variables is indicated by the tilde-formula given as the first argument. It has the format `y ~ x` with the actual names of the variables substituted for `y` and `x`.
+
+```{r main-graph}
+gf_jitter(wage ~ sector, 
+          data = mosaicData::CPS85, 
+          width = 0.2, alpha = 0.5)
+```
+
+The `width = 0.2` argument controls how spread out the points are horizontally in each of the groups defined by the explanatory variable. The `alpha = 0.5` argument makes the points semi-transparent so that it's easy to see when one point is lying on top of another.
+
+## Calculating the statistics
+
+The statistics are calculated using the `df_stats()` function. This function takes the same formula and data arguments as `gf_jitter()`, with additional arguments listing the statistics to  be calculated.
+
+```{r calc-stats}
+df_stats(wage ~ sector, 
+         data = mosaicData::CPS85,
+         mean, ci.mean(level = 0.95), sd)
+```
+
+## Graphing the statistics
+
+Once the statistics have been calculated, they are plotted using the `gf_errorbar()` function, like this:
+
+```{r graph-stats}
+Stats <- df_stats(wage ~ sector, 
+                  data = mosaicData::CPS85, 
+                  mean, ci.mean(level = 0.95), sd)
+gf_jitter(wage ~ sector, 
+          data = mosaicData::CPS85, 
+          width = 0.2, alpha = 0.5) %>%
+  gf_errorbar(lower + upper ~ sector, 
+              data = Stats, color = "black") %>%
+  gf_errorbar(mean_wage + mean_wage ~ sector, 
+              data = Stats, 
+              color = "blue", size = 2)
+
+```
+
+### Drawing a sample
+
+The app includes data frames with thousands of rows. From these, a random sample of size n is drawn for the display and calculation of statistics. For non-stratified sampling, the command to do this is
+
+```{r non-stratified}
+The_sample <- mosaicData::CPS85 %>%
+  sample_n(size = 10)
+```
+
+For stratified sampling, the command is a little different and results in n rows being drawn from each of the groups defined by the categorical explanatory variable (`sector` in this example).
+
+```{r stratified}
+The_stratified_sample <- mosaicData::CPS85 %>%
+  group_by(sector) %>%
+  sample_n(size = 10)
+```
+
+### Refinements
+
+When there is no explanatory variable, the plotting tilde-formula should have a 1 on the right side of the tilde, e.g. `wage ~ 1`. On its own, this doesn't make a satisfactory graphic since the points are scattered across the full width of the graph. To avoid this, the scale of the x-axis is set explicitly and the labeling of the x-axis is turned off. This involves a rather long pair of commands, the first of which defines a graphical "theme" and the second makes the plot, sets the axis limits, and uses the theme.
+
+```{r single-var-graph}
+no_x_axis <- theme(axis.title.x=element_blank(),
+      axis.text.x=element_blank(),
+      axis.ticks.x=element_blank())
+gf_jitter(wage ~ 1, 
+          data = mosaicData::CPS85, 
+          width = 0.2, alpha = 0.5) %>%
+  gf_lims(x = c(0,2)) %>% 
+  gf_theme(no_x_axis)
+```
+

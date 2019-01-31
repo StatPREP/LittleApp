@@ -97,6 +97,8 @@ SERVER <- function(input, output, session) {
       glue::glue("{req(app_state$n_trials)} trials taken so {nrow(app_state$Trials)} rows of randomization trial data.\n")
     })
 
+
+
     construct_plot <- reactive({
       req(input$var_y, input$var_x)
       req(the_data$initialized)
@@ -107,9 +109,6 @@ SERVER <- function(input, output, session) {
       if (input$var_y %in% names(plot_data)  && input$var_y %in% names(plot_data))  {
         # The next line gets all the accumulated randomization trials.
         Trials <- get_all_trials()
-cat("About to plot\n")
-cat("Var y is", input$var_y, "with class", class(input$var_y), "\n")
-cat("Formula is", as.character(the_formula), "\n")
         level <- as.numeric(input$interval_level)
         mfun <- function(x) mosaicCore::ci.median(level)
 
@@ -178,8 +177,35 @@ cat("Formula is", as.character(the_formula), "\n")
     output$explain <- renderText({
       HTML(includeHTML("explain.html"))
     })
+
+    stat_table <- reactive({
+      level <- as.numeric(input$interval_level)
+      input$show_mean
+      if (input$var_y == "bogus") return("Not available yet. Select a statistic to display.")
+      level <- as.numeric(input$interval_level)
+      the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
+      Stats <- mosaicCore::df_stats(the_formula, data = get_sample(),
+                                    mean = mean, mean = mosaicCore::ci.mean(!!level),
+                                    median = median, sd = sd,
+                                    prediction = coverage(!!level),
+                                    na.action = "na.pass")
+
+      Stats$interval_level <- as.numeric(input$interval_level)
+      Res <- Stats  %>% mutate_if(is.numeric, function(x) signif(x, digits = 4)) %>%
+        {if (!input$show_mean)    select(., - mean) else .} %>%
+        {if (!input$show_ci)  select(., -mean_lower, -mean_upper) else .} %>%
+        {if (!input$show_median)  select(.,  -median) else .} %>%
+        {if (!input$show_sd) select(.,  -sd) else .} %>%
+        {if (!input$show_pred_interval) select(.,  -prediction_lower,  -prediction_upper) else .}
+
+     Res
+    })
+
+
     output$statistics <- renderText({
-      HTML(includeHTML("statistics.html"))
+      knitr::kable(stat_table(), format = "html") %>%
+        kableExtra::kable_styling() %>%
+        HTML()
     })
   }
 
