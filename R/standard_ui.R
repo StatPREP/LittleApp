@@ -4,26 +4,24 @@
 #' @param collapsed Logical indicating whether to display box as collapsed initially
 #'
 #' @export
-LA_data_source <- function(width = 12, collapsed = TRUE) {
+LA_data_source <- function(width = 12, collapsed = FALSE) {
   box(title = "Data source", width = width, status = "primary", solidHeader = FALSE,
       collapsible = TRUE, collapsed = collapsed,
       background = "black",
       selectInput("frame", "Data frame",
                   choices = LA_available_data()) %>% tighten(top=0),
-      conditionalPanel(condition = "input.frame == 'Your own data'",
-                       textInput("URL", "URL", value = "")
-      )
+      # Still under development
+      # conditionalPanel(condition = "input.frame == 'Your own data'",
+      #                 textInput("URL", "URL", value = ""))
+      hr(),
+      p("Variables selected"),
+      # 1 stands for "no variable selected"
+      tighten(selectizeInput("var_y", "Response", choices = list("1"))),
+      tighten(selectizeInput("var_x", "Explanatory", choices = list("1"))),
+      tighten(selectizeInput("covar", "Covariate", choices = list("1")))
       )
 }
-#' @export
-LA_variables_ui <- function(width = 12, collapsed = TRUE) {
-  box(title = "Variables", width = width, status = "primary", solidHeader = FALSE,
-      collapsible = TRUE, collapsed = collapsed, background = "black",
-      tighten(selectizeInput("var_y", "Response", choices = list("bogus"))),
-      tighten(selectizeInput("var_x", "Explanatory", choices = list("bogus"))),
-      tighten(selectizeInput("covar", "Covariates", choices = list("bogus"), multiple = TRUE))
-  )
-}
+
 #' @export
 LA_sample_ui <- function(width = 12, collapsed = FALSE) {
   box(title = "Sample", width = width, status = "primary", solidHeader = TRUE,

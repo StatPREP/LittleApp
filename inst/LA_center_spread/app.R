@@ -1,19 +1,6 @@
 #
 # Center and spread
 #
-
-# Joe Roith's requests:
-#
-# * Make default for "Explanatory Var." as No_explanatory_variable. I think this will help students ease into using the app.
-#
-# * Separate Median and Range. Both features are great, but would like to have mean and median comparisons simplified.
-#
-# * Summary stat values for mean, median, standard deviation (maybe ranges/intervals). Even just an additional tab option for calculated values would be nice. I like the idea of having students "estimate" mean locations and standard deviations, but it would be nice to know actual values.
-#
-# * Is it possible to convert some of the NHANES variables (height, weight, etc)? We were concerned the metric system may pose barriers for some students.
-#
-# * Some of the others wanted to have a histogram option. I actually like the density violin and want to use it more in my own teaching. But as far as bridging their own lessons to the Little App, we felt it would be good to have that option.
-
 library(shiny)
 library(shinydashboard)
 library(littleapp2)
@@ -53,12 +40,10 @@ UI <- function(request) { #it's a function  for bookmarking
       title = "Center and spread",
       titleWidth = "90%"
     ),
-    dashboardSidebar(
-      width = 350,
-      LA_data_source(6),
-      LA_variables_ui(6),
-      LA_sample_ui(6),
-      choose_stats
+    dashboardSidebar(width = 350
+      , LA_data_source(6)
+      , choose_stats
+      , LA_sample_ui(6)
       #, LA_inference(6),
       #, bookmarkButton()
     ),
@@ -67,9 +52,7 @@ UI <- function(request) { #it's a function  for bookmarking
   )
 }
 
-no_x_axis <- theme(axis.title.x=element_blank(),
-      axis.text.x=element_blank(),
-      axis.ticks.x=element_blank())
+
 
 SERVER <- function(input, output, session) {
     the_data <- reactiveValues()
@@ -79,9 +62,9 @@ SERVER <- function(input, output, session) {
 
 
     # Choose the variables
-    select_x <- function(x) c(".none." = "1", ".none." = "1", x %>% filter(!numeric) %>% .$vname)
-    select_y <- function(x) x %>% filter(numeric) %>% .$vname
-    select_z <- function(x) character(0) # no covariates possible
+    select_x <- LA_selectCategorical(max_levels = 8, none = TRUE)
+    select_y <- LA_selectNumeric()
+    select_z <- LA_selectNone()
 
     # Reactives and observers used throughout the various Little Apps
     LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
@@ -96,8 +79,6 @@ SERVER <- function(input, output, session) {
       input$shuffle
       glue::glue("{req(app_state$n_trials)} trials taken so {nrow(app_state$Trials)} rows of randomization trial data.\n")
     })
-
-
 
     construct_plot <- reactive({
       req(input$var_y, input$var_x)
@@ -181,9 +162,11 @@ SERVER <- function(input, output, session) {
     stat_table <- reactive({
       level <- as.numeric(input$interval_level)
       input$show_mean
-      if (input$var_y == "bogus") return("Not available yet. Select a statistic to display.")
+      if (input$var_y == "1")
+        return("Not available yet. Select a statistic to display.")
       level <- as.numeric(input$interval_level)
-      the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
+      the_formula <- get_space_formula()
+        # as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
       Stats <- mosaicCore::df_stats(the_formula, data = get_sample(),
                                     mean = mean, mean = mosaicCore::ci.mean(!!level),
                                     median = median, sd = sd,

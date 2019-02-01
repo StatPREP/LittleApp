@@ -14,5 +14,11 @@ Imports:
     rlang,
     shiny, 
     shinydashboard,
+    shinyjs,
     mosaic, mosaicData, dplyr, ggformula,
+    ggplot2, 
     tools, tidyr
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

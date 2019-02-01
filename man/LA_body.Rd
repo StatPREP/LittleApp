@@ -2,10 +2,23 @@
 % Please edit documentation in R/body.R
 \name{LA_body}
 \alias{LA_body}
-\title{Basic organization of Little App user interface}
+\title{Builds the main panel of a little app}
 \usage{
-LA_body()
+LA_body(...)
+}
+\arguments{
+\item{...}{Additional \code{tabPanels()} to include in the tab box}
+}
+\value{
+The HTML which creates the dashboard body
 }
 \description{
-Basic organization of Little App user interface
+You can add additional tabs via the ...
+}
+\examples{
+LA_body()  # a default app
+one <- tabPanel("A new tab", plotOutput("second_plot"), height = "400px")
+two <- tabPanel("Another new tab", tableOutput("data_display"))
+LA_body(one, two)
+
 }

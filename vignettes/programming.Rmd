@@ -1,0 +1,143 @@
+---
+title: "Programming a Little App"
+author: "Daniel Kaplan"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overall organization of a Little App
+
+Little apps are all built on a common template. This enforces visual consistency among the little apps and simplifies programming, since much of a little app works "straight out of the box."
+
+
+
+In order to create a new app,
+
+1. Create a directory with a name that will look good as the last part of a URL. That name is how users will access your app.
+2. In that directory, place a copy of the `app.R` file from the little apps template directory. You can bring a copy of that file into the RStudio editor by invoking `LA_template_for_app()`:
+
+    ```{r eval = FALSE}
+LA_template_for_app()
+```
+
+   You will have to save the file as `app.R` in the directory you created in (1).
+3. With the `app.R` file open in the editor, press the RStudio "Run App" button and verify that the app runs. At that point you're ready to start customizing the app.
+
+The customization consists of writing your own shiny renderers, reactives, and observers, along with whatever non-reactive code (such as plotting statements and other calculations) needed to support your app.
+
+
+## Built-in controls
+
+Data sets and controls for choosing response and explanatory variables, and sample size are built in.
+
+Mostly, your reactives will interact with the data via predefined reactives built into the package and template. These include:
+
+* `get_sample()` will return the current sample of data. Only the selected variables will be included.
+* `get_sample_size()` gives the current choice for the sample size $n$ as an integer.
+* `get_overall_sample_size()`, like `get_sample_size()` but takes into account if the sample is stratified. A stratified sample will have $k \times n$ rows, with $k$ being the number of groups defined by a categorical explanatory variable. (Stratification only applies if the explanatory variable is not  numeric. Stratification is done with replacement, so that low-population groups can  always have $n$ cases in the stratified data.)
+
+The input widgets for the user's choices have standard names, which you should use:
+
+* `input$frame`: the name  of the data frame
+* `input$var_y`: name of the response variable, always shown on the y-axis of the graph. (character string)
+* `input$var_x`: name of the explanatory variable to be used for the x-axis of the graph. (character string)
+* `input$covar`: name(s) of any covariates selected (character string vector with, potentially multiple elements.) If there is no covariate selected, the value is `.none`.
+* `input$sample_size`: the  size of the sample. (character string)
+* `input$stratify`: whether to stratify the sample according to the explanatory variable (if it's categorical). The total sample size will be the number of groups defined by the explanatory variable times `input$sample_size()`
+* `input$new_sample`: triggered when the user presses the new-sample button.
+
+## Default values for uncommonly used inputs
+
+There are some inputs that do not appear in the little-app template, but for which default values are desired. These have been implemented as reactives, that is, you refer to the input value via a reactive. If you want for the non-default value to be available, instantiate these controls in your UI using the names given below.
+
+* `spline_order()`: a reactive. If there is an input manual control named `spline_order`, this will report it's value as a number. Otherwise, returns 1 for a straight-line model.
+* `include_interaction()` a reactive. If there is an input control named `include_interaction`, this will return its value
+* `jitter_width()` a reactive. The corresponding manual control should be `jitter_width`
+* `jitter_height()`, like `jitter_width()`.
+* `dot_alpha()` sets the alpha level (in a way that depends on the number of points). Corresponding manual control should be named `dot_alpha`
+
+## Built-in outputs
+
+* `output$main_plot`
+* `output$codebook <- renderText({ Your HTML })`
+* `output$statistics <- renderText({Your HTML})`
+* `output$explain <- renderText({Your HTML})`
+* `output$rcode <- renderText({Your HTML})`
+* To help you debug
+    - `output$debug_text <- renderText({Your text})`
+    - `output$debug_plot <- renderPlot({Your plot})`
+    - `output$debug_table <- renderTable({Your table})`
+
+## Built-in reactives
+
+The data oriented ones
+
+
+The user interface consists of two main components:
+
+1. A sidebar that will contain choices you make for controls.
+2. A main panel, built by `LA_body()` that consists of a shiny `plotOutput()` and a `tabBox()` with several built-in tabs. You can add additional tabs with the `...` argument to `LA_body()`.
+
+
+```{r echo = FALSE}
+body(LA_body)
+```
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))

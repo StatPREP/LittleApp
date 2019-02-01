@@ -1,8 +1,21 @@
-#' Basic organization of Little App user interface
+#' Builds the main panel of a little app
+#'
+#' You can add additional tabs via the ...
+#'
+#' @param ... Additional `tabPanels()` to include in the tab box
+#'
+#' @return The HTML which creates the dashboard body
+#'
+#' @examples
+#' LA_body()  # a default app
+#' one <- tabPanel("A new tab", plotOutput("second_plot"), height = "400px")
+#' two <- tabPanel("Another new tab", tableOutput("data_display"))
+#' LA_body(one, two)
 #'
 #' @export
-LA_body <- function() {
+LA_body <- function(...) {
   dashboardBody(
+    shinyjs::useShinyjs(),
     plotOutput("main_plot", height = "400px"),
     HTML("<br>"),
     tabBox(
@@ -13,9 +26,10 @@ LA_body <- function() {
       tabPanel("Statistics", htmlOutput("statistics")),
       tabPanel("Explain", htmlOutput("explain")),
       tabPanel("R commands", htmlOutput("rcode")),
+      ...,
       tabPanel("Debug",
                textOutput("debug_text"),
-               #plotOutput("debug_plot"),
+               plotOutput("debug_plot"),
                tableOutput("debug_table"))
     ),
     tags$head(tags$style(HTML('

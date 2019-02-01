@@ -3,7 +3,13 @@
 #' @export
 LA_standard_reactives <-
   function(input, output, session, the_data, app_state) {
-
+    get_sample_size <<- reactive({
+      as.integer(req(input$samp_size))
+    })
+    get_overall_sample_size <<- reactive({
+      # handles when the sample is stratified
+      nrow(get_sample())
+    })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       input$var_y
@@ -18,8 +24,108 @@ LA_standard_reactives <-
                    c(input$var_y, input$var_x, input$covar),
                    the_data$frame)
     })
+    # Need this intermediate, because sometimes there is no explanatory variable
+    # This will be signaled by NA
+    get_explanatory_var <<- reactive({
+      if (input$var_x == "1") 1
+      else get_sample()[input$var_x]
+    })
+    get_explanatory_type <<- reactive({
+      X <- get_explanatory_var()
+      if (length(X) == 1) return("constant")
+      else if (is.numeric(X)) return("numeric")
+      else return("categorical")
+    })
 
+    get_response_type <<- reactive({
+      # categorical, numeric, logical, probability
+      if (input$var_y == "1") return("invalid") # not yet initialized
+      Y <- get_sample()[input$var_y]
+      if (!is.numeric(Y)) {
+        if (is.logical(Y)) return("logical")
+        else return("categorical")
+      } else {
+        if (min(x) >= 0 && max(x) <= 1) return("probability")
+        else return("numeric")
+      }
+    })
 
+    # Inf if numeric and more than 10, the actual number of levels otherwise
+    get_n_explanatory_groups <<- reactive({
+      X <- get_explanatory_var()
+      n_unique <- length(unique(X))
+      if (is.numeric(X) && n_unique >= 10) Inf
+      else n_unique
+    })
+
+    # Formula  for  y  ~  x with faceting
+    get_frame_formula <<- reactive({
+      req(input$var_y, input$var_x)
+      as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
+    })
+
+    spline_order <<- reactive({
+      if ("spline_order" %in% names(input)) as.numeric(input$spline_order)
+      else 1
+    })
+
+    jitter_height <<- reactive({
+      if ("jitter_height" %in% names(input)) input$jitter_height
+      else if (get_explanatory_type() == "numeric") 0
+      else 0.2
+    })
+    jitter_width <<- reactive({
+      if ("jitter_width" %in% names(input)) input$jitter_width
+      else if (get_response_type() == "numeric") 0
+      else 0.2
+    })
+
+    dot_alpha <<- reactive({
+      if ("dot_alpha" %in% names(input)) input$dot_alpha
+      else LA_point_alpha(get_overall_sample_size())
+    })
+
+    get_color_formula <<- reactive({
+      req(input$covar)
+      cat("Covariate is", input$covar, "with length", length(input$covar), "\n")
+
+      res <-
+        if (is.null(input$covar) || input$covar == "1") "black"
+        else as.formula(glue::glue(" ~ {input$covar[1]}"))
+      cat("Color formula is", as.character(res), "\n")
+
+      res
+    })
+
+    standard_dot_plot <<- reactive({
+      P <- gf_jitter(get_frame_formula(), data = get_sample(),
+                     color = get_color_formula(),
+                     width = jitter_width(),
+                     height = jitter_height(),
+                     alpha = dot_alpha()
+      )
+
+      if (get_explanatory_type() == "constant")
+        P <- P %>% gf_lims(x = c(0, 2)) %>% gf_theme(no_x_axis)
+
+      P
+    })
+
+    # a straight line formula, no interaction
+    get_model_formula <<- reactive({
+      string <- glue:glue("{input$var_y} ~ {input$var_x}")
+      if (input$covar != "1")
+        string <- string %>%  paste(., " + {input$covar[1]}")
+      as.formula(string)
+    })
+    # a potentially curvy formula (natural cubic splines)
+    # with a linear interaction with the covariate
+    get_flexible_formula <<- reactive({
+      order <- spline_order()
+      string <- glue:glue("{input$var_y} ~ ns({input$var_x}, order)")
+      if (input$covar != "1")
+        string <- string %>%  paste(., " * {input$covar[1]}")
+    })
 
     get_resample <<- reactive({
       cat("New resampling trial.\n")
@@ -82,6 +188,15 @@ LA_standard_observers <-
       }
     })
 
+    # turn off the stratify switch when explanatory variable is numeric
+    # but the control retains whatever value it had
+    observe({
+      if (get_response_type() %in% c("numerical", "probability"))
+         shinyjs::disable("stratify")
+      else shinyjs::enable("stratify")
+    })
+
+
     observe({
       output$debug_table <- renderTable(the_data$types)
       vnames_y <- select_y(the_data$types)
@@ -90,7 +205,9 @@ LA_standard_observers <-
       updateSelectInput(session, "var_y", choices =  vnames_y)
       updateSelectInput(session, "var_x", choices =  vnames_x,
                         selected = vnames_x[pmin(2, length(vnames_x))])
-      updateSelectInput(session, "covar", choices =  vnames_z[!vnames_z %in% c(vnames_x, vnames_y)])
+      cat("Covariate possibilities are", paste(vnames_z, collapse = ", "))
+      updateSelectInput(session, "covar", choices =  vnames_z)
+                          #vnames_z[!vnames_z %in% c(vnames_x, vnames_y)])
       the_data$initialized <<- TRUE
           })
 
