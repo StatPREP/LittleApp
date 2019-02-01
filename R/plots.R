@@ -1,0 +1,17 @@
+#' Plots and plot helpers
+#'
+#' @export
+LA_dot_layer <- function(formula, data, color, width, height, alpha) {
+  P <- gf_jitter(formula,
+                 data = data,
+                 color = color,
+                 width = width,
+                 height = height,
+                 alpha = alpha
+  )
+
+  if (rlang::f_rhs(formula) == 1)
+    P <- P %>% gf_lims(x = c(0, 2)) %>% gf_theme(no_x_axis)
+
+  P
+}

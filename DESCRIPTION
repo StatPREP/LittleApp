@@ -15,9 +15,12 @@ Imports:
     shiny, 
     shinydashboard,
     shinyjs,
-    mosaic, mosaicData, dplyr, ggformula,
+    mosaic, mosaicData, mosaicModel,
+    dplyr, 
+    ggformula,
     ggplot2, 
-    tools, tidyr
+    tools, 
+    tidyr
 Suggests: 
     knitr,
     rmarkdown

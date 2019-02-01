@@ -32,7 +32,7 @@ LA_sample_ui <- function(width = 12, collapsed = FALSE) {
         tighten(bottom = 10, top = -10),
       selectInput("samp_size", "Sample size n",
                   choices = c(5,10,20,50,100,200,500,1000,2000),
-                  selected = 100) %>% tighten(),
+                  selected = 0) %>% tighten(), # 0 is temporary
       checkboxInput("stratify", "Stratify", value = FALSE) %>% tighten()
   )
 }

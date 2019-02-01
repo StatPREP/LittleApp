@@ -12,13 +12,10 @@ LA_standard_reactives <-
     })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
-      input$var_y
-      input$var_x
-      input$covar
+      req(input$var_y != 1) # make sure it's initialized to a variable
       # remove the resampling trials
       isolate(app_state$n_trials <<- 0)
-      req(input$samp_size) # for the dependency
-      get_a_sample(as.numeric(req(input$samp_size)),
+      get_a_sample(as.numeric(input$samp_size),
                    input$stratify,
                    input$var_x,
                    c(input$var_y, input$var_x, input$covar),
@@ -81,34 +78,25 @@ LA_standard_reactives <-
     })
 
     dot_alpha <<- reactive({
-      if ("dot_alpha" %in% names(input)) input$dot_alpha
+      alpha <- if ("dot_alpha" %in% names(input)) input$dot_alpha
       else LA_point_alpha(get_overall_sample_size())
+
+      cat("Alpha is", alpha, "\n")
+      alpha
     })
 
     get_color_formula <<- reactive({
-      req(input$covar)
-      cat("Covariate is", input$covar, "with length", length(input$covar), "\n")
-
-      res <-
         if (is.null(input$covar) || input$covar == "1") "black"
         else as.formula(glue::glue(" ~ {input$covar[1]}"))
-      cat("Color formula is", as.character(res), "\n")
-
-      res
     })
 
     standard_dot_plot <<- reactive({
-      P <- gf_jitter(get_frame_formula(), data = get_sample(),
-                     color = get_color_formula(),
-                     width = jitter_width(),
-                     height = jitter_height(),
-                     alpha = dot_alpha()
-      )
-
-      if (get_explanatory_type() == "constant")
-        P <- P %>% gf_lims(x = c(0, 2)) %>% gf_theme(no_x_axis)
-
-      P
+      LA_dot_layer(get_frame_formula(),
+                   data = get_sample(),
+                   color = get_color_formula(),
+                   width = jitter_width(),
+                   height = jitter_height(),
+                   alpha = dot_alpha())
     })
 
     # a straight line formula, no interaction
@@ -205,7 +193,6 @@ LA_standard_observers <-
       updateSelectInput(session, "var_y", choices =  vnames_y)
       updateSelectInput(session, "var_x", choices =  vnames_x,
                         selected = vnames_x[pmin(2, length(vnames_x))])
-      cat("Covariate possibilities are", paste(vnames_z, collapse = ", "))
       updateSelectInput(session, "covar", choices =  vnames_z)
                           #vnames_z[!vnames_z %in% c(vnames_x, vnames_y)])
       the_data$initialized <<- TRUE

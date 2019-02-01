@@ -42,32 +42,26 @@ UI <- function(request) { #it's a function  for bookmarking
 
 # Boilerplate for the SERVER
 SERVER <- function(input, output, session) {
-  the_data <- reactiveValues()
-  app_state <- reactiveValues(n_trials = 0, Trials = data.frame())
-
   # App-specific selection of variables from the data frame
   select_x <- LA_selectCategorical(max_levels = 8, none = TRUE)
   select_y <- LA_selectNumeric()
   select_z <- LA_selectCategorical(max_levels = 8, none = TRUE)
 
   # Reactives and observers used throughout the various Little Apps
+  the_data <- reactiveValues()
+  app_state <- reactiveValues(n_trials = 0, Trials = data.frame())
   LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
   LA_standard_reactives(input, output, session, the_data, app_state)
 
   # Add your own renderers, reactives, and observers here.
   # For instance ...
-  my_plot <- reactive({
 
-    standard_dot_plot() #%>%
-    # gf_text(1 ~ 1,
-    #         label = ifelse(input$do_you_like_it,
-    #                        "I'm glad you like it.",
-    #                        "Please check the 'Do you like it?' box!")
-    # )
-  })
   output$main_plot <- renderPlot({
-    my_plot()
-
+    cat("Alpha is", dot_alpha(), "\n")
+    P <- standard_dot_plot()
+    P %>%  gf_labs(title = ifelse(input$do_you_like_it,
+                                  "I'm glad you like it.",
+                                  "Please check the 'Do you like it?' box!"))
     })
   # Other built-in output widgets besides output$main_plot
   # output$codebook <- renderText({ Your HTML })

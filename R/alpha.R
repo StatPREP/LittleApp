@@ -6,5 +6,5 @@
 #'
 #' @export
 LA_point_alpha <- function(n) {
-  pmin(1, 0.2 + 1.6 / 2^log10(n)) # a trick?
+  pmin(1, 0.35 + 1.6 / 2^log10(n)) # a trick?
 }
