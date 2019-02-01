@@ -61,7 +61,7 @@ The input widgets for the user's choices have standard names, which you should u
 
 There are some inputs that do not appear in the little-app template, but for which default values are desired. These have been implemented as reactives, that is, you refer to the input value via a reactive. If you want for the non-default value to be available, instantiate these controls in your UI using the names given below.
 
-* `spline_order()`: a reactive. If there is an input manual control named `spline_order`, this will report it's value as a number. Otherwise, returns 1 for a straight-line model.
+* `get_spline_order()`: a reactive. If there is an input manual control named `spline_order`, this will report it's value as a number. Otherwise, returns 1 for a straight-line model.
 * `include_interaction()` a reactive. If there is an input control named `include_interaction`, this will return its value
 * `jitter_width()` a reactive. The corresponding manual control should be `jitter_width`
 * `jitter_height()`, like `jitter_width()`.

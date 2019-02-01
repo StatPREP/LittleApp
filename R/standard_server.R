@@ -12,9 +12,13 @@ LA_standard_reactives <-
     })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
+      req(the_data$frame)
       req(input$var_y != 1) # make sure it's initialized to a variable
+      req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
+      req(input$var_x %in% c("1", names(the_data$frame)))
       # remove the resampling trials
       isolate(app_state$n_trials <<- 0)
+
       get_a_sample(as.numeric(input$samp_size),
                    input$stratify,
                    input$var_x,
@@ -61,7 +65,7 @@ LA_standard_reactives <-
       as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
     })
 
-    spline_order <<- reactive({
+    get_spline_order <<- reactive({
       if ("spline_order" %in% names(input)) as.numeric(input$spline_order)
       else 1
     })
@@ -78,16 +82,13 @@ LA_standard_reactives <-
     })
 
     dot_alpha <<- reactive({
-      alpha <- if ("dot_alpha" %in% names(input)) input$dot_alpha
+      if ("dot_alpha" %in% names(input)) input$dot_alpha
       else LA_point_alpha(get_overall_sample_size())
-
-      cat("Alpha is", alpha, "\n")
-      alpha
     })
 
     get_color_formula <<- reactive({
         if (is.null(input$covar) || input$covar == "1") "black"
-        else as.formula(glue::glue(" ~ {input$covar[1]}"))
+        else as.formula(glue::glue(" ~ {input$covar}"))
     })
 
     standard_dot_plot <<- reactive({
@@ -99,20 +100,29 @@ LA_standard_reactives <-
                    alpha = dot_alpha())
     })
 
-    # a straight line formula, no interaction
+    #  no interaction
     get_model_formula <<- reactive({
-      string <- glue:glue("{input$var_y} ~ {input$var_x}")
+      order <- get_spline_order()
+      # For zeroth order, use -input$var_x so that mod_eval knows var_x is an "input"
+      if (order == 0) string <- glue::glue("{input$var_y} ~ (1 - {input$var_x})")
+      else if (order == 1) string <- glue::glue("{input$var_y} ~ {input$var_x}")
+      else string <- glue::glue("{input$var_y} ~ splines::ns({input$var_x}, {order})")
       if (input$covar != "1")
-        string <- string %>%  paste(., " + {input$covar[1]}")
+        string <- string %>%  paste(., glue::glue(" + {input$covar}"))
+
       as.formula(string)
     })
     # a potentially curvy formula (natural cubic splines)
     # with a linear interaction with the covariate
     get_flexible_formula <<- reactive({
-      order <- spline_order()
-      string <- glue:glue("{input$var_y} ~ ns({input$var_x}, order)")
+      order <- get_spline_order()
+      if (order == 0) return(get_model_formula())
+      else if (order == 1) string <- glue::glue("{input$var_y} ~ {input$var_x}")
+      else string <- glue::glue("{input$var_y} ~ splines::ns({input$var_x}, {order})")
       if (input$covar != "1")
-        string <- string %>%  paste(., " * {input$covar[1]}")
+        string <- string %>%  paste(., glue::glue(" * {input$covar}"))
+
+      as.formula(string)
     })
 
     get_resample <<- reactive({

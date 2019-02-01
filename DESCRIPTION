@@ -20,7 +20,8 @@ Imports:
     ggformula,
     ggplot2, 
     tools, 
-    tidyr
+    tidyr, 
+    broom
 Suggests: 
     knitr,
     rmarkdown
