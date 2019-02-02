@@ -1,0 +1,3 @@
+### Little App: Linear Modeling
+
+This is a place to put some expository material about the app. 
