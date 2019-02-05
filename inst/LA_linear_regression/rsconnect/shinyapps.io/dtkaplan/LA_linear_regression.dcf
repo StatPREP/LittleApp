@@ -1,0 +1,12 @@
+name: LA_linear_regression
+title: LA_linear_regression
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 683659
+bundleId: 1851064
+url: https://dtkaplan.shinyapps.io/LA_linear_regression/
+when: 1549055550.16835
+asMultiple: FALSE
+asStatic: FALSE
