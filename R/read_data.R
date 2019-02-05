@@ -49,8 +49,9 @@ LA_read_data <- function(data_name = "Health", package = "littleapp2") {
 }
 
 #` @export
-get_a_sample <- function(size, stratify, strat_var, vars, frame){
+get_a_sample <- function(size, stratify, strat_var, vars, frame, seed){
   frame <- frame[names(frame) %in% vars] %>% na.omit()
+  set.seed(seed)
   F <- if (stratify && strat_var != "1" && !is.numeric(frame[strat_var])) {
     # need to resample in case there are not enough
     # cases in any given stratum

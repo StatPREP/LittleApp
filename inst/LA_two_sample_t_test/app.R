@@ -1,5 +1,5 @@
 #
-# A blank tempate for a Little App
+# t-test  Little App
 #
 library(shiny)
 library(shinydashboard)
@@ -15,6 +15,8 @@ my_special_controls <-
   box(title = "Inference", width = 6, background = "black",
       status = "primary", solidHeader = TRUE,
       collapsible = FALSE, collapsed = FALSE,
+      sliderInput("null_mu", "Null hypothesis 'mu'", min = 0, max = 1, value = 0.5) %>%
+        tighten(bottom = -10),
       checkboxInput("show_mean", "Show mean?", value = TRUE) %>%
         tighten(bottom = -10),
       checkboxInput("show_ci", "Show conf. interval?", value = TRUE) %>%
@@ -36,13 +38,16 @@ my_special_controls <-
 # Boilerplate for the UI
 
 UI <- function(request) { #it's a function  for bookmarking
+
   dashboardPage(
+
     dashboardHeader(
-      title = "Template App",
+      title = "The t-test",
       titleWidth = "90%"
     ),
     dashboardSidebar(
       width = 350
+      ,shinyjs::useShinyjs()
       , LA_data_source(6)
       , LA_sample_ui(6)
       # , LA_inference(6)    # No resampling
@@ -50,16 +55,20 @@ UI <- function(request) { #it's a function  for bookmarking
       #bookmarkButton()
     ),
 
-    LA_body() # The body is entirely pre-defined
+    LA_body(
+      tabPanel("Raw data", tableOutput("raw_data"))
+    )
   )
 }
 
 # Boilerplate for the SERVER
 SERVER <- function(input, output, session) {
   # App-specific selection of variables from the data frame
-  select_x <- LA_selectCategorical(max_levels = 2, none = FALSE)
+  select_x <- LA_selectCategorical(max_levels = 2, none = TRUE)
   select_y <- LA_selectNumeric()
   select_z <- LA_selectNone()
+
+  shinyjs::hide("covar") # no covariate in  this app
 
   # Reactives and observers used throughout the various Little Apps
   the_data <- reactiveValues()
@@ -67,8 +76,35 @@ SERVER <- function(input, output, session) {
   LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
   LA_standard_reactives(input, output, session, the_data, app_state)
 
-  # Add your own renderers, reactives, and observers here.
-  # For instance ...
+  null_hypothesis <- reactive({
+    if ("null_mu" %in% names(input)) input$null_mu
+    else 0
+  })
+
+  observeEvent(input$var_y, {
+      yvar <- get_response_var()
+      miny <- min(yvar, na.rm = TRUE)
+      maxy <- max(yvar, na.rm = TRUE)
+      sdy <- sd(yvar, na.rm = TRUE)
+      updateSliderInput(session, "null_mu",
+                        min = pretty(pmin(miny,0) - sdy)[1],
+                        max = pretty(pmax(0, maxy) + sdy)[2],
+                        value = 0,
+                        step = pretty(sdy)[1]/10)
+  })
+  observe({
+    if (no_explanatory_var())  {
+      shinyjs::show("null_mu")
+      shinyjs::hide("show_t")
+      shinyjs::hide("shuffle")
+      shinyjs::hide("var_equal")
+    } else {
+      shinyjs::hide("null_mu")
+      shinyjs::show("show_t")
+      shinyjs::show("shuffle")
+      shinyjs::show("var_equal")
+    }
+  })
 
   get_app_data <- reactive({
     this_data <-  req(get_sample())
@@ -77,24 +113,42 @@ SERVER <- function(input, output, session) {
     this_data
   })
 
-  output$main_plot <- renderPlot({
+  output$raw_data <- renderTable({
+    get_sample() %>% head(500) %>%
+      mutate(row_number = 1:nrow(.))
+  })
 
-    two_sample_t_plot(get_frame_formula(), get_app_data(),
-                      level = as.numeric(input$interval_level),
-                      show_mean = input$show_mean,
-                      show_ci = input$show_ci,
-                      show_t = input$show_t,
-                      var_equal = input$var_equal)
-    })
+  output$main_plot <- renderPlot({
+    if (no_explanatory_var()) {
+      one_sample_t_plot(get_frame_formula(), get_app_data(),
+                        level = as.numeric(input$interval_level),
+                        show_mean = input$show_mean,
+                        show_ci = input$show_ci,
+                        null_hypothesis = null_hypothesis()) %>%
+        gf_labs(title = "One-sample t-test")
+    } else {
+      two_sample_t_plot(get_frame_formula(), get_app_data(),
+                        level = as.numeric(input$interval_level),
+                        show_mean = input$show_mean,
+                        show_ci = input$show_ci,
+                        show_t = input$show_t,
+                        var_equal = input$var_equal) %>%
+        gf_labs(title = "Two-sample t-test")
+    }
+  })
   # Other built-in output widgets besides output$main_plot
   # output$codebook <- renderText({ Your HTML })
   output$statistics <- renderText({
-   text <- capture.output(t.test(get_frame_formula(),
-                                 get_app_data(),
-                                 var.equal = input$var_equal  )) %>%
-     paste(., collapse = "\n")
-   HTML(paste("<pre>", text, "</pre>"))
+    text <- if (no_explanatory_var()) {
+      capture.output(t.test(get_response_var(), mu = null_hypothesis()))
+    } else {
+      capture.output(t.test(get_frame_formula(),
+                            get_app_data(),
+                            var.equal = input$var_equal  ))
+    }
+   HTML(paste("<pre>", text %>% paste(., collapse = "\n"), "</pre>"))
   })
+
   output$explain <- renderText({
     HTML(includeHTML("explain.html"))
   })

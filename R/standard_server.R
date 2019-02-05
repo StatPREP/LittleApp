@@ -15,7 +15,7 @@ LA_standard_reactives <-
       req(the_data$frame)
       req(input$var_y != 1) # make sure it's initialized to a variable
       req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
-      req(input$var_x %in% c("1", names(the_data$frame)))
+      req(no_explanatory_var() || input$var_x %in% names(the_data$frame))
       # remove the resampling trials
       isolate(app_state$n_trials <<- 0)
 
@@ -23,13 +23,17 @@ LA_standard_reactives <-
                    input$stratify,
                    input$var_x,
                    c(input$var_y, input$var_x, input$covar),
-                   the_data$frame)
+                   the_data$frame,
+                   get_sample_seed())
     })
     # Need this intermediate, because sometimes there is no explanatory variable
     # This will be signaled by NA
     get_explanatory_var <<- reactive({
-      if (input$var_x == "1") 1
-      else get_sample()[input$var_x]
+      if (no_explanatory_var()) 1
+      else get_sample()[[input$var_x]]
+    })
+    get_response_var <<- reactive({
+      get_sample()[[req(input$var_y)]]
     })
     get_explanatory_type <<- reactive({
       X <- get_explanatory_var()
@@ -87,8 +91,14 @@ LA_standard_reactives <-
     })
 
     get_color_formula <<- reactive({
-        if (is.null(input$covar) || input$covar == "1") "black"
+        if (no_covariate()) "black"
         else as.formula(glue::glue(" ~ {input$covar}"))
+    })
+
+    get_sample_seed <<- reactive({
+      # reset the seed each time the "new sample" button is pressed
+      input$new_sample
+      Sys.time()
     })
 
     standard_dot_plot <<- reactive({
@@ -100,6 +110,12 @@ LA_standard_reactives <-
                    alpha = dot_alpha())
     })
 
+    no_explanatory_var <<- reactive({
+      req(input$var_x) == "1"
+    })
+    no_covariate <<- reactive({
+      req(input$covar == "1")
+    })
     #  no interaction
     get_model_formula <<- reactive({
       order <- get_spline_order()
@@ -145,7 +161,8 @@ LA_standard_reactives <-
                         input$stratify,
                         input$var_x,
                         c(input$var_y, input$var_x, input$covar),
-                        the_data$frame)
+                        the_data$frame,
+                        seed = Sys.time())
 
 
       # Randomization as needed
@@ -211,9 +228,9 @@ LA_standard_observers <-
 
     observe({
       req(input$frame)
-      n_possible <- c(outer( c(1, 2, 5), c(10,100,1000,10000), FUN = "*"))
+      n_possible <- c(outer( c(1, 2, 5), c(10, 100, 1000, 10000), FUN = "*"))
       n_possible <- n_possible[ n_possible != nrow(req(the_data$frame))]
-      n_possible <- c(5, n_possible[n_possible <= nrow(the_data$frame)],
+      n_possible <- c(2, 5, n_possible[n_possible <= nrow(the_data$frame)],
                       nrow(req(the_data$frame)))
       choices <- as.list(n_possible)
       names_for_choices <- choices
@@ -231,7 +248,10 @@ LA_standard_observers <-
 
     get_all_trials <<- reactive({ app_state$Trials })
 
-
+    observe({
+      if (no_explanatory_var()) shinyjs::hide("stratify")
+      else shinyjs::show("stratify")
+    })
 
     observeEvent(input$new_trial, {
       if (isolate(input$accumulate_trials)) {
