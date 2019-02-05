@@ -108,7 +108,8 @@ SERVER <- function(input, output, session) {
 
   get_app_data <- reactive({
     this_data <-  req(get_sample())
-    if (input$shuffle) this_data[[2]] <- shuffle(this_data[[2]])
+    if (input$shuffle && ! no_explanatory_var())
+      this_data[[2]] <- shuffle(this_data[[2]])
 
     this_data
   })
