@@ -116,6 +116,7 @@ SERVER <- function(input, output, session) {
 
   output$raw_data <- renderTable({
     get_sample() %>% head(500) %>%
+      ungroup() %>%
       mutate(row_number = 1:nrow(.))
   })
 
