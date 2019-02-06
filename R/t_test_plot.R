@@ -3,10 +3,11 @@
 #' @export
 two_sample_t_plot <-  function(formula, data, level = 0.95,
                                show_mean = TRUE, show_ci = TRUE,
-                               show_t = TRUE, var_equal = TRUE) {
+                               show_t = TRUE, var_equal = TRUE,
+                               y_range = NULL) {
+  var_y <- as.character(formula[[2]])
+  if (is.null(y_range)) y_range = range(data[[var_y]], na.rm = TRUE)
   color_formula <- formula[c(1,3)] # one-sided formula
-  ci_formula  <- formula
-
 
   P <-
     LA_dot_layer(formula = formula, data = data,
@@ -59,15 +60,19 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
               data = T_stats, vjust = 0)
   }
 
-  P
+  # As much as possible, keep all samples on same scale,
+  #  but display whole of confidence interval
+  total_range <- range(y_range, c(min(Stats$ci_lower), max(Stats$ci_upper)))
+  P %>% gf_lims(y = total_range)
 }
 
 #' One-sample t test plot
 #' @export
 one_sample_t_plot <- function (formula, data, level = 0.95,
                                show_mean = TRUE, show_ci = TRUE,
-                               null_hypothesis = 0) {
+                               null_hypothesis = 0, y_range = NULL) {
   var_y <- as.character(formula[[2]])
+  if (is.null(y_range)) y_range = range(data[[var_y]], na.rm = TRUE)
   P <-
     LA_dot_layer(formula = formula, data = data, color = "black", width =  0.15, height = 0,
                  alpha = LA_point_alpha(nrow(data)), seed = 101) %>%
@@ -96,6 +101,7 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
     res$p_label <- nice_p(tmp$p.value, 3)
 
     T_stats <- as.data.frame(res)
+
     P <-
       P <- do.call(gf_errorbar, list(P,
                                      ci_lower + ci_upper ~ xpos,
@@ -108,6 +114,9 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
       gf_text(top ~ midpoint, color = "black", label = ~ p_label,
               data = T_stats, vjust = 0)
   }
+  # As much as possible, keep all samples on same scale,
+  #  but display whole of confidence interval
+  total_range <- range(y_range, c(min(Stats$ci_lower), max(Stats$ci_upper)))
+  P %>% gf_lims(y = total_range)
 
-  P
 }

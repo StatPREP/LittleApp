@@ -10,6 +10,10 @@ LA_standard_reactives <-
       # handles when the sample is stratified
       nrow(get_sample())
     })
+    # The whole range, not just the range of the sample
+    get_y_range <<- reactive({
+      range(the_data$frame[[input$var_y]], na.rm = TRUE)
+    })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       req(the_data$frame)
@@ -206,7 +210,7 @@ LA_standard_observers <-
     # turn off the stratify switch when explanatory variable is numeric
     # but the control retains whatever value it had
     observe({
-      if (get_response_type() %in% c("numerical", "probability"))
+      if (get_explanatory_type() %in% c("numerical", "probability"))
          shinyjs::disable("stratify")
       else shinyjs::enable("stratify")
     })
@@ -249,7 +253,7 @@ LA_standard_observers <-
     get_all_trials <<- reactive({ app_state$Trials })
 
     observe({
-      if (no_explanatory_var()) shinyjs::hide("stratify")
+      if (no_explanatory_var() || "numeric" == get_explanatory_type()) shinyjs::hide("stratify")
       else shinyjs::show("stratify")
     })
 

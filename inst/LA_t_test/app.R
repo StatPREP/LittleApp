@@ -126,7 +126,8 @@ SERVER <- function(input, output, session) {
                         level = as.numeric(input$interval_level),
                         show_mean = input$show_mean,
                         show_ci = input$show_ci,
-                        null_hypothesis = null_hypothesis()) %>%
+                        null_hypothesis = null_hypothesis(),
+                        y_range = get_y_range()) %>%
         gf_labs(title = "One-sample t-test")
     } else {
       two_sample_t_plot(get_frame_formula(), get_app_data(),
@@ -134,7 +135,8 @@ SERVER <- function(input, output, session) {
                         show_mean = input$show_mean,
                         show_ci = input$show_ci,
                         show_t = input$show_t,
-                        var_equal = input$var_equal) %>%
+                        var_equal = input$var_equal,
+                        y_range = get_y_range()) %>%
         gf_labs(title = "Two-sample t-test")
     }
   })
