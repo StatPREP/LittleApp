@@ -1,7 +1,7 @@
 Package: littleapp2
 Type: Package
 Title: Support for writing a Little App
-Version: 0.1.0
+Version: 0.2.0
 Author: Daniel Kaplan
 Maintainer: Daniel Kaplan <kaplan@macalester.edu>
 Description: Provides utilities and data for Little Apps, including a Shiny framework.
@@ -21,7 +21,8 @@ Imports:
     ggplot2, 
     tools, 
     tidyr, 
-    broom
+    broom,
+    ungeviz
 Suggests: 
     knitr,
     rmarkdown
