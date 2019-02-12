@@ -21,11 +21,12 @@ bootstrap_controls <-
   box(title = "Bootstrap Trials", width = 6, background = "black",
       status = "primary", solidHeader = TRUE,
       collapsible = FALSE, collapsed = FALSE,
-      radioButtons("bs_display", "Display", choices = c("One trial", "Ensemble")) %>%
+      radioButtons("bs_display", "Display", choices = c("One trial", "Many trials")) %>%
         tighten(bottom = -10),
       selectInput("ntrials", "# of trials", choices =
                     c("5" = 5, "10" = 10, "20" = 20,
-                      "50" = 50, "100" = 100))  %>%
+                      "50" = 50, "100" = 100),
+                  value = 50)  %>%
         tighten(bottom = -10),
       actionButton("new_bs_trial", "New Trial",
                    icon = icon("dice"),
@@ -94,7 +95,7 @@ SERVER <- function(input, output, session) {
   })
 
   observe({
-    if (input$bs_display == "Ensemble") {
+    if (input$bs_display == "Many trials") {
       shinyjs::show("ntrials")
       shinyjs::hide("new_bs_trial")
     } else {
@@ -134,10 +135,9 @@ SERVER <- function(input, output, session) {
     else P %>% gf_lims(y  = get_y_range())
     })
   # Other built-in output widgets besides output$main_plot
-  # output$codebook <- renderText({ Your HTML })
   # output$statistics <- renderText({Your HTML})
-  # output$explain <- renderText({Your HTML})
-  # output$rcode <- renderText({Your HTML})
+  output$explain <- renderText({includeHTML("explain.html")})
+  output$rcode <- renderText({includeHTML("r-commands.html")})
   # output$debug_text <- renderText({Your text})
   # output$debug_plot <- renderPlot({Your plot})
   # output$debug_table <- renderTable({Your table})
