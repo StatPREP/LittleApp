@@ -15,6 +15,8 @@
 #'
 
 library(NHANES)
+library(littleapp2)
+
 SDSdata::sds_setup()
 
 frame <-
@@ -72,16 +74,22 @@ frame <-
       orientation_sex = "SexOrientation") %>%
     mutate(age = ifelse(is.na(months), age, months/12)) %>%
     select(- months)
+# create some binary variables
+frame$home_type <- ifelse(frame$home_own == "Other", NA, as.character(frame$home_own))
+frame$days_with_no_interest <- ifelse(frame$little_interest  == "None", "No", "Yes")
+frame$ever_married <- ifelse(frame$marital %in% c("LivePartner", "NeverMarried"), "No",  "Yes")
 codebook <- list(
   sex = "Sex of study participant	coded as male or female",
   age = "Age in years at screening of study participant. Note: Subjects 80 years or older were recorded as 80.",
   marital = "Marital status of study participant. Reported for participants aged 20 years or older. One of Married, Widowed, Divorced, Separated, NeverMarried, or LivePartner (living with partner).",
+  ever_married  = "Was the participant ever married",
   race = "Reported race of study participant: Mexican, Hispanic, White, Black, or Other.",
   education = "Educational level of study participant Reported for participants aged 20 years or older. One of 8thGrade, 9-11thGrade, HighSchool, SomeCollege, or CollegeGrad.",
   income = "Total annual gross income for the household in US dollars. The levels are categorical: the number refers to the middle income in a category.",
   income_poverty = "The ratio of income in dollars to the poverty level of income",
   home_rooms = "How many rooms are in home of study participant (counting kitchen but not bathroom). 13 rooms = 13 or more rooms.",
   home_own = "One of Home, Rent, or Other indicating whether the home of study participant or someone in their family is owned, rented or occupied by some other arrangement",
+  home_type =  "Does the participant own or rent their home",
   bmi = "BMI",
   bmi_who = "Body mass index category. Reported for participants aged 2 years or older. One of 12.0_18.4, 18.5_24.9, 25.0_29.9, or 30.0_plus.",
   pulse = "60 second pulse rate",
@@ -101,6 +109,7 @@ codebook <- list(
   phys_health_bad_days = "Self-reported number of days participant's physical health was not good out of the past 30 days. Reported for participants aged 12 years or older.",
   mental_health_bad_days = "Self-reported number of days participant's mental health was not good out of the past 30 days. Reported for participants aged 12 years or older.",
   little_interest = "Self-reported number of days where participant had little interest in doing things. Reported for participants aged 18 years or older. One of None, Several, Majority (more than half the days), or AlmostAll.",
+  days_with_no_interest = "Does the participant have more than the occasional day when they have little  interest in doing things.",
   depressed = "Self-reported number of days where participant felt down, depressed or hopeless. Reported for participants aged 18 years or older. One of None, Several, Majority (more than half the days), or AlmostAll.",
   n_pregnancies = "How many times participant has been pregnant. Reported for female participants aged 20 years or older.",
   n_babies = "How many of participants deliveries resulted in live births. ",
