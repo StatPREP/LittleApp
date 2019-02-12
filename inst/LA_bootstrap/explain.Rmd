@@ -39,7 +39,7 @@ This_sample <-
   Health %>% 
   select(age) %>% 
   sample_n(size = 10) %>% 
-  mutate(xj = seq(0.8, 1.2, length = nrow(.)))
+  mutate(xj = seq(0.8, 1.2, length = nrow(.)), group =  "all")
 littleapp2::show_bootstrap_sample_disc(This_sample, age ~ 1, stat = mean)
 ```
 The randomly collected sample has $n=10$ and consequently there are 10 data points in the graph. (Count them!) The smallest value for age is about 8, the next smallest about 20, then two points at about 32, and so on, up to a maximum of 55 years. Some of the dots are blue and some white, but there are 10 dots altogether. The black line gives the mean of the 10 values of age. The mean is about 39. Of course these number apply only to the particular sample shown in the graph above. The graph on your computer screen will likely have other dots.
@@ -67,11 +67,45 @@ bsr <- bootstrapper(20, seed = 101)
 ggplot(data = This_sample, aes(x = xj, y = age)) + geom_blank() +
     geom_point(shape = 21, size = 6, fill = "white") +
     geom_text(label = "0", hjust = 0.5, vjust = 0.5, size = 10/.pt, aes(x = xj)) +
-    geom_point(data = bsr,  aes(x = xj, group = .row),
+    geom_point(data = bsr,  aes(x = xj, group = .draw),
                shape = 21, size = 6, fill = "blue", alpha = 1) +
-    geom_text(data = bsr, aes(x = xj, label = .copies, group = .row),
+    geom_text(data = bsr, aes(x = xj, label = .copies, group = .draw),
               hjust = 0.5, vjust = 0.5, size = 10/.pt, color = "white") +
+  stat_summary_bin(data = bsr, fun.y = "mean",
+               aes(x = 1, group=.draw),
+               width = 0.6, color = "blue", geom  = "hpline",
+               alpha = 1) +
+  stat_summary_bin(data = This_sample,
+               fun.y = "mean", aes(x =  1),  
+               width = 0.6, color = "black", alpha = .6, 
+               geom = "hpline") +
   xlim(0, 2) +
-  transition_states(.draw, 2, 1) + 
-  enter_fade() + exit_fade()
+  ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank()) +
+  transition_states(.draw, transition_length  = 2, state_length  = 0)
 ```
+
+The precision of the estimate is indicated by the spread of the blue line across all the trials.  In the movie above,  you see only one trial at a time. But it's  easier to see the spread if the blue lines for *all* the trials  at the same time. To  see that, select the "Many trials" mode. The graph will look somewhat like this:
+
+```{r many_trials, echo = FALSE, cache = TRUE}
+bsr <- bootstrapper(30, seed = 101)
+Trials <- bsr(This_sample)
+Stats <- df_stats( age ~ .draw, data  = Trials, the_mean = mean) %>%
+  mutate(group = "all")
+Stats_data <- df_stats(age ~ 1,  data = This_sample, the_mean = mean)
+
+ggplot(data = This_sample) + 
+   geom_point(aes(x = xj, y = age), size = 6,  shape=21, fill = "white") +
+  xlim(0, 2) +
+  ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank()) +
+  geom_hpline(data  = Stats_data, aes(y = the_mean, x = 1), 
+              color = "black",  alpha = 0.75) +
+  geom_hpline(data  = Stats, 
+              aes(y = the_mean, x = 1, group  = .draw), 
+              color = "blue",  alpha = 0.25)  
+```
+
+The trials show a range of mean values, from  about 33 to 45. This indicates the estimate is 39 ± 6 years of age.
