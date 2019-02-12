@@ -26,7 +26,7 @@ bootstrap_controls <-
       selectInput("ntrials", "# of trials", choices =
                     c("5" = 5, "10" = 10, "20" = 20,
                       "50" = 50, "100" = 100),
-                  value = 50)  %>%
+                  selected = 50)  %>%
         tighten(bottom = -10),
       actionButton("new_bs_trial", "New Trial",
                    icon = icon("dice"),

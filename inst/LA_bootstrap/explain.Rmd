@@ -1,3 +1,11 @@
+---
+output: 
+  html_document: 
+    fig_caption: yes
+---
+
+
+
 # Resampling and Bootstrapping
 
 ```{r include = FALSE}
@@ -42,6 +50,8 @@ This_sample <-
   mutate(xj = seq(0.8, 1.2, length = nrow(.)), group =  "all")
 littleapp2::show_bootstrap_sample_disc(This_sample, age ~ 1, stat = mean)
 ```
+***Figure 1**: Showing  the  original sample (the dots) and the points selected in a resampling trial. The  black bar shows the mean value  of the y-variable for the original  data, the blue bar is for the resampling trial.^[The graphic and the movie in Figure 2 are based on a style developed by Claus Wilke and his software in the [`ungeviz`  package.](https://github.com/wilkelab/ungeviz)]*
+
 The randomly collected sample has $n=10$ and consequently there are 10 data points in the graph. (Count them!) The smallest value for age is about 8, the next smallest about 20, then two points at about 32, and so on, up to a maximum of 55 years. Some of the dots are blue and some white, but there are 10 dots altogether. The black line gives the mean of the 10 values of age. The mean is about 39. Of course these number apply only to the particular sample shown in the graph above. The graph on your computer screen will likely have other dots.
 
 Now for the simulation. Imagine $n=10$ blindfolded kids playing "pin the tail on the donkey." But instead of a donkey, the kids will place a sticker on the graph. The data point they select in this manner will be the one closest to their sticker. So after all $n=10$ kids have had their turn, there will be ten stickers. Some of the data points will have just one sticker, some might have two or three. The number of stickers for each data point in this one trial of the game is shown by the white number inside the dots. For instance, the point with age 19 has two stickers, while the point with age 8 has just one sticker. Add up the numbers inside the dots and you'll get exactly 10; one sticker for each of the 10 kids.
@@ -86,7 +96,12 @@ ggplot(data = This_sample, aes(x = xj, y = age)) + geom_blank() +
   transition_states(.draw, transition_length  = 2, state_length  = 0)
 ```
 
-The precision of the estimate is indicated by the spread of the blue line across all the trials.  In the movie above,  you see only one trial at a time. But it's  easier to see the spread if the blue lines for *all* the trials  at the same time. To  see that, select the "Many trials" mode. The graph will look somewhat like this:
+***Figure 2**: An animation of a sequence of resampling trials*
+
+
+The precision of the estimate is indicated by the spread of the blue line across all the trials.  In the movie above,  you see only one trial at a time. But it's  easier to see the spread if the blue lines for *all* the trials  at the same time. To  see that, select the "Many trials" mode. The graph will look somewhat like Figure  3.
+
+The trials show a range of mean values, from  about 33 to 45. This indicates the estimate is 39 ± 6 years of age.
 
 ```{r many_trials, echo = FALSE, cache = TRUE}
 bsr <- bootstrapper(30, seed = 101)
@@ -108,4 +123,4 @@ ggplot(data = This_sample) +
               color = "blue",  alpha = 0.25)  
 ```
 
-The trials show a range of mean values, from  about 33 to 45. This indicates the estimate is 39 ± 6 years of age.
+***Figure 3**: Displaying the results (blue lines) for dozens of trials  (all based on resampling the original data points shown) gives an idea of the  precision of the estimate from the original  data (black line).* 

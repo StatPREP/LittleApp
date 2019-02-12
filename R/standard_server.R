@@ -242,7 +242,7 @@ LA_standard_observers <-
       names(choices) <- names_for_choices
       names(choices)[length(choices)] <- "Population" # IS THIS REDUNDANT?
       updateSelectInput(session, "samp_size",
-                        choices = choices, selected = 200)
+                        choices = choices, selected = 50)
     })
 
     # delete all trials  when new sample or accumulate_trials is turned  off
