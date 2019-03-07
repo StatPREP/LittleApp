@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 695465
-bundleId: 1872625
+bundleId: 1885074
 url: https://dtkaplan.shinyapps.io/LA_bootstrap/
-when: 1550008155.25013
+when: 1550600491.93836
 asMultiple: FALSE
 asStatic: FALSE

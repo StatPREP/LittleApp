@@ -34,7 +34,6 @@ UI <- function(request) { #for bookmarking
     dashboardSidebar(
       width = 350,
       LA_data_source(6),
-      LA_variables_ui(6),
       LA_sample_ui(6),
       # LA_inference(6),
       jitter_controls

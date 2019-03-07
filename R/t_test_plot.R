@@ -72,7 +72,7 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
                              ymax = ruler$ymax,
                              ymid = (ruler$ymin + ruler$ymax) / 2,
                              x = 0.8, stringsAsFactors = FALSE,
-                             label = glue::glue("Top: {signif(ruler$ymax,3)}\nHeight: {height}\nBottom: {signif(ruler$ymin,3)}"))
+                             label = glue::glue("Top: {signif(ruler$ymax,3)} \nHeight: {height} \nBottom: {signif(ruler$ymin,3)} "))
 
   # Gosh! I don't know why I need to  do it this way, in raw ggplot
      P <- P  +
@@ -115,7 +115,7 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
                              ymax = ruler$ymax,
                              ymid = (ruler$ymin + ruler$ymax) / 2,
                         x = 0.6, stringsAsFactors = FALSE,
-                        label = glue::glue("Top: {signif(ruler$ymax,3)}\nHeight: {height}\nBottom: {signif(ruler$ymin,3)}"))
+                        label = glue::glue("Top: {signif(ruler$ymax,3)} \nHeight: {height} \nBottom: {signif(ruler$ymin,3)} "))
      P <- P  %>% gf_segment(ymin + ymax ~ x + x,
                             arrow = arrow(ends = "both"),
                             data = Ruler_info) %>%
