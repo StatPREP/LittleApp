@@ -117,7 +117,8 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
                         x = 0.6, stringsAsFactors = FALSE,
                         label = glue::glue("Top: {signif(ruler$ymax,3)} \nHeight: {height} \nBottom: {signif(ruler$ymin,3)} "))
      P <- P  %>% gf_segment(ymin + ymax ~ x + x,
-                            arrow = arrow(ends = "both"),
+                            arrow = arrow(ends = "both",
+                                          length = unit(0.1, "inches")),
                             data = Ruler_info) %>%
      gf_text(ymid ~ x, label = ~ label, data = Ruler_info, hjust = 1)
   }
