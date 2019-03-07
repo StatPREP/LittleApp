@@ -4,7 +4,7 @@
 two_sample_t_plot <-  function(formula, data, level = 0.95,
                                show_mean = TRUE, show_ci = TRUE,
                                show_t = TRUE, var_equal = TRUE,
-                               y_range = NULL) {
+                               y_range = NULL,  ruler = NULL) {
   var_y <- as.character(formula[[2]])
   if (is.null(y_range)) y_range = range(data[[var_y]], na.rm = TRUE)
   color_formula <- formula[c(1,3)] # one-sided formula
@@ -18,6 +18,7 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
     df_stats(formula, data = data,  mn = mean,
              ci = ci.mean(level = !!level)) %>%
     mutate(xpos = c(1.25, 1.75))
+
 
   if (show_mean) {
     P <- do.call(gf_errorbar, list(P, mn + mn ~ xpos,
@@ -60,17 +61,43 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
               data = T_stats, vjust = 0)
   }
 
+
   # As much as possible, keep all samples on same scale,
   #  but display whole of confidence interval
   total_range <- range(y_range, c(min(Stats$ci_lower), max(Stats$ci_upper)))
-  P %>% gf_lims(y = total_range)
+  P <- P %>% gf_lims(y = total_range)
+  if ( ! is.null(ruler)) {
+    height <- signif(ruler$ymax - ruler$ymin, 3)
+    Ruler_info <- data.frame(ymin = ruler$ymin,
+                             ymax = ruler$ymax,
+                             ymid = (ruler$ymin + ruler$ymax) / 2,
+                             x = 0.8, stringsAsFactors = FALSE,
+                             label = glue::glue("Top: {signif(ruler$ymax,3)}\nHeight: {height}\nBottom: {signif(ruler$ymin,3)}"))
+
+  # Gosh! I don't know why I need to  do it this way, in raw ggplot
+     P <- P  +
+      geom_segment(aes(y = Ruler_info$ymin,
+                       yend = Ruler_info$ymax,
+                       x = Ruler_info$x,
+                       xend = Ruler_info$x),
+                   color  = "black",
+                   arrow = arrow(ends = "both", length = unit(0.1, "inches"))) +
+      geom_text(aes(y = Ruler_info$ymid,
+                    x = Ruler_info$x,
+                    label = Ruler_info$label),
+                color = "black",
+                hjust = 1)
+  }
+
+  P
 }
 
 #' One-sample t test plot
 #' @export
 one_sample_t_plot <- function (formula, data, level = 0.95,
                                show_mean = TRUE, show_ci = TRUE,
-                               null_hypothesis = 0, y_range = NULL) {
+                               null_hypothesis = 0, y_range = NULL,
+                               ruler = NULL) {
   var_y <- as.character(formula[[2]])
   if (is.null(y_range)) y_range = range(data[[var_y]], na.rm = TRUE)
   P <-
@@ -82,6 +109,18 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
              ci = ci.mean(level = !!level)) %>%
     mutate(xpos = c(1.5))
 
+  if ( ! is.null(ruler)) {
+    height <- signif(ruler$ymax - ruler$ymin, 3)
+    Ruler_info <- data.frame(ymin = ruler$ymin,
+                             ymax = ruler$ymax,
+                             ymid = (ruler$ymin + ruler$ymax) / 2,
+                        x = 0.6, stringsAsFactors = FALSE,
+                        label = glue::glue("Top: {signif(ruler$ymax,3)}\nHeight: {height}\nBottom: {signif(ruler$ymin,3)}"))
+     P <- P  %>% gf_segment(ymin + ymax ~ x + x,
+                            arrow = arrow(ends = "both"),
+                            data = Ruler_info) %>%
+     gf_text(ymid ~ x, label = ~ label, data = Ruler_info, hjust = 1)
+  }
   if (show_mean) {
     P <- do.call(gf_errorbar, list(P, mn + mn ~ xpos,
                                    data = Stats,

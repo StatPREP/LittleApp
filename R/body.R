@@ -3,6 +3,15 @@
 #' You can add additional tabs via the ...
 #'
 #' @param ... Additional `tabPanels()` to include in the tab box
+#' @param plot_widget Controls how the plotting frame is set  up.
+#' Default: `plotOutput("main_plot", height = "400px")`. Must come *after* the
+#' `...`` arguments.
+#'
+
+#'
+#' By default, the plot widget will be set up as  a simple `plotOutput()` shiny object.
+#' By using the `plot_widget` argument, you  can add brush  controls or choose to
+#' substitute something entirely for the plot space in the app.
 #'
 #' @return The HTML which creates the dashboard body
 #'
@@ -13,10 +22,13 @@
 #' LA_body(one, two)
 #'
 #' @export
-LA_body <- function(...) {
+LA_body <- function(..., plot_widget = NULL) {
   dashboardBody(
     shinyjs::useShinyjs(),
-    plotOutput("main_plot", height = "400px"),
+    if (is.null(plot_widget))
+      plotOutput("main_plot", height = "400px")
+    else
+      plot_widget,
     HTML("<br>"),
     tabBox(
       title = "Info", width = 12,

@@ -5,7 +5,8 @@
 \title{One-sample t test plot}
 \usage{
 one_sample_t_plot(formula, data, level = 0.95, show_mean = TRUE,
-  show_ci = TRUE, null_hypothesis = 0, y_range = NULL)
+  show_ci = TRUE, null_hypothesis = 0, y_range = NULL,
+  ruler = NULL)
 }
 \description{
 One-sample t test plot

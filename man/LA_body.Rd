@@ -4,10 +4,18 @@
 \alias{LA_body}
 \title{Builds the main panel of a little app}
 \usage{
-LA_body(...)
+LA_body(..., plot_widget = NULL)
 }
 \arguments{
 \item{...}{Additional \code{tabPanels()} to include in the tab box}
+
+\item{plot_widget}{Controls how the plotting frame is set  up.
+Default: \code{plotOutput("main_plot", height = "400px")}. Must come \emph{after} the
+`...`` arguments.
+
+By default, the plot widget will be set up as  a simple \code{plotOutput()} shiny object.
+By using the \code{plot_widget} argument, you  can add brush  controls or choose to
+substitute something entirely for the plot space in the app.}
 }
 \value{
 The HTML which creates the dashboard body

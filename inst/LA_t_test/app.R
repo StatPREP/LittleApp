@@ -8,9 +8,6 @@ library(markdown)
 library(mosaic)
 library(ggformula)
 
-# App-specific controls
-# Define one or more such control boxes with the special controls
-# needed for your app
 my_special_controls <-
   box(title = "Inference", width = 6, background = "black",
       status = "primary", solidHeader = TRUE,
@@ -56,7 +53,9 @@ UI <- function(request) { #it's a function  for bookmarking
     ),
 
     LA_body(
-      tabPanel("Raw data", tableOutput("raw_data"))
+      tabPanel("Raw data", tableOutput("raw_data")),
+      plot_widget = plotOutput("main_plot", height = "400px",
+                               brush = brushOpts(id="ruler",  direction  = "y"))
     )
   )
 }
@@ -127,7 +126,8 @@ SERVER <- function(input, output, session) {
                         show_mean = input$show_mean,
                         show_ci = input$show_ci,
                         null_hypothesis = null_hypothesis(),
-                        y_range = get_y_range()) %>%
+                        y_range = get_y_range(),
+                        ruler = input$ruler) %>%
         gf_labs(title = "One-sample t-test")
     } else {
       two_sample_t_plot(get_frame_formula(), get_app_data(),
@@ -136,7 +136,8 @@ SERVER <- function(input, output, session) {
                         show_ci = input$show_ci,
                         show_t = input$show_t,
                         var_equal = input$var_equal,
-                        y_range = get_y_range()) %>%
+                        y_range = get_y_range(),
+                        ruler = input$ruler) %>%
         gf_labs(title = "Two-sample t-test")
     }
   })
