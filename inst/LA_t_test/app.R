@@ -3,6 +3,7 @@
 #
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(littleapp2)
 library(markdown)
 library(mosaic)
@@ -53,6 +54,12 @@ UI <- function(request) { #it's a function  for bookmarking
     ),
 
     LA_body(
+      tabPanel(
+        "p-value diagram",
+        plotOutput("p_diagram"),
+        sliderTextInput("sig_level", "Significance level",
+                        choices = c(0.5, 0.75, 0.90, 0.95, 0.99, 0.999, 0.9999),
+                        selected = 0.95)),
       tabPanel("Raw data", tableOutput("raw_data")),
       plot_widget = plotOutput("main_plot", height = "400px",
                                brush = brushOpts(id="ruler",  direction  = "y"))
@@ -156,6 +163,42 @@ SERVER <- function(input, output, session) {
 
   output$explain <- renderText({
     HTML(includeHTML("explain.html"))
+  })
+  output$p_diagram <- renderPlot({
+    the_formula <- get_frame_formula()
+    if (rhs(the_formula) == 1) {
+      Stats <- stats::t.test(get_response_var())
+      graph_title <- "Sample mean"
+      observed <- Stats$statistic
+      # get the observed mean on the scale of the observed t-statistic
+      conversion <- abs(Stats$estimate / observed)
+    } else {
+      Stats <- stats::t.test(the_formula, data = get_sample(),
+                           var.equal = TRUE)
+      graph_title <- "Difference in sample means"
+      observed <- Stats$statistic
+      conversion <- abs(diff(Stats$estimate) / observed)
+    }
+
+    df <- Stats$parameter
+
+    standard_dev <- 12
+    x_outer <- pmax(3, abs(observed))
+    text_formula <- as.formula(glue::glue("0.2 ~ {observed}"))
+    mosaic::cdist("t", input$sig_level, df = df,
+                  return = "plot", alpha = 0.5) %>%
+      gf_labs(x = "t-statistic", y = "Relative probability",
+              title = "Sampling distribution under Null Hypothesis") %>%
+      gf_vline(xintercept  = observed, color = "red") %>%
+      gf_lims(x = x_outer  * c(-1, 1)) %>%
+      gf_text(text_formula,  label = "Observed value",
+              data = NULL, angle = 90) %>%
+      gf_segment(0.2 + 0.2 ~ 0 + 1, color = "black", data  = NULL) %>%
+      gf_theme(
+        scale_x_continuous(
+          breaks = c((-ceiling(x_outer)):ceiling(x_outer)),
+          sec.axis = sec_axis(~ . * conversion, name = graph_title)))
+
   })
   output$rcode <- renderText({HTML(
     includeHTML("r-commands.html"))

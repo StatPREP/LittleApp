@@ -238,9 +238,9 @@ LA_standard_observers <-
                       nrow(req(the_data$frame)))
       choices <- as.list(n_possible)
       names_for_choices <- choices
-      names_for_choices[length(names_for_choices)] <- "Population"
+      names_for_choices[length(names_for_choices)] <- "Sampling frame (all the data)"
       names(choices) <- names_for_choices
-      names(choices)[length(choices)] <- "Population" # IS THIS REDUNDANT?
+      names(choices)[length(choices)] <- "Sampling frame (all the data)" # IS THIS REDUNDANT?
       updateSelectInput(session, "samp_size",
                         choices = choices, selected = 50)
     })
