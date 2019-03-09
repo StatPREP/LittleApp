@@ -182,7 +182,6 @@ SERVER <- function(input, output, session) {
 
     df <- Stats$parameter
 
-    standard_dev <- 12
     x_outer <- pmax(3, abs(observed))
     text_formula <- as.formula(glue::glue("0.2 ~ {observed}"))
     mosaic::cdist("t", input$sig_level, df = df,
