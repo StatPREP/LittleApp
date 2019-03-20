@@ -3,6 +3,7 @@
 #
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(littleapp2)
 library(markdown)
 library(mosaic)
@@ -34,7 +35,7 @@ my_special_controls <-
 UI <- function(request) { #it's a function  for bookmarking
   dashboardPage(
     dashboardHeader(
-      title = "Template App",
+      title = "Common and rare values",
       titleWidth = "90%"
     ),
     dashboardSidebar(

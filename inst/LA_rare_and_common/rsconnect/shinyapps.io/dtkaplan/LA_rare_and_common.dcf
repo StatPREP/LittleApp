@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 803241
-bundleId: 1953853
+bundleId: 1953969
 url: https://dtkaplan.shinyapps.io/LA_rare_and_common/
-when: 1553115549.62058
+when: 1553117957.90387
 asMultiple: FALSE
 asStatic: FALSE
