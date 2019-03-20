@@ -1,5 +1,8 @@
 #' Basic  server elements for Little Apps
 #'
+#' Randy points out that I need to document this and have a list of the
+#' standard reactives.
+#'
 #' @export
 LA_standard_reactives <-
   function(input, output, session, the_data, app_state) {

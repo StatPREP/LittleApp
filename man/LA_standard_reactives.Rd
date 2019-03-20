@@ -7,5 +7,6 @@
 LA_standard_reactives(input, output, session, the_data, app_state)
 }
 \description{
-Basic  server elements for Little Apps
+Randy points out that I need to document this and have a list of the
+standard reactives.
 }

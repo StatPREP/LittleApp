@@ -16,13 +16,15 @@ Imports:
     shinydashboard,
     shinyjs,
     mosaic, mosaicData, mosaicModel,
+    forcats,
     dplyr, 
     ggformula,
     ggplot2, 
     tools, 
     tidyr, 
     broom,
-    ungeviz
+    ungeviz,
+    natality2014
 Suggests: 
     knitr,
     rmarkdown
