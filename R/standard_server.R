@@ -6,8 +6,17 @@
 #' @export
 LA_standard_reactives <-
   function(input, output, session, the_data, app_state) {
-    get_sample_size <<- reactive({
-      as.integer(req(input$samp_size))
+    input_sample_size <<- reactive({
+      if ("samp_size" %in% names(input)) as.integer(req(input$samp_size))
+      else -1 # flag for all the  data
+    })
+    input_stratify <<- reactive({
+      if ("stratify" %in% names(input)) input$stratify
+      else FALSE
+    })
+    input_covar <<- reactive({
+      if ("covar" %in% names(input)) input$covar
+      else 1
     })
     get_overall_sample_size <<- reactive({
       # handles when the sample is stratified
@@ -26,10 +35,10 @@ LA_standard_reactives <-
       # remove the resampling trials
       isolate(app_state$n_trials <<- 0)
 
-      get_a_sample(as.numeric(input$samp_size),
-                   input$stratify,
+      get_a_sample(input_sample_size(),
+                   input_stratify(),
                    input$var_x,
-                   c(input$var_y, input$var_x, input$covar),
+                   c(input$var_y, input$var_x, input_covar()),
                    the_data$frame,
                    get_sample_seed())
     })
@@ -99,7 +108,7 @@ LA_standard_reactives <-
 
     get_color_formula <<- reactive({
         if (no_covariate()) "black"
-        else as.formula(glue::glue(" ~ {input$covar}"))
+        else as.formula(glue::glue(" ~ {input_covar()}"))
     })
 
     get_sample_seed <<- reactive({
@@ -121,7 +130,7 @@ LA_standard_reactives <-
       req(input$var_x) == "1"
     })
     no_covariate <<- reactive({
-      req(input$covar == "1")
+      req(input_covar() == "1")
     })
     #  no interaction
     get_model_formula <<- reactive({
@@ -130,8 +139,8 @@ LA_standard_reactives <-
       if (order == 0) string <- glue::glue("{input$var_y} ~ (1 - {input$var_x})")
       else if (order == 1) string <- glue::glue("{input$var_y} ~ {input$var_x}")
       else string <- glue::glue("{input$var_y} ~ splines::ns({input$var_x}, {order})")
-      if (input$covar != "1")
-        string <- string %>%  paste(., glue::glue(" + {input$covar}"))
+      if (input_covar() != "1")
+        string <- string %>%  paste(., glue::glue(" + {input_covar()}"))
 
       as.formula(string)
     })
@@ -142,8 +151,8 @@ LA_standard_reactives <-
       if (order == 0) return(get_model_formula())
       else if (order == 1) string <- glue::glue("{input$var_y} ~ {input$var_x}")
       else string <- glue::glue("{input$var_y} ~ splines::ns({input$var_x}, {order})")
-      if (input$covar != "1")
-        string <- string %>%  paste(., glue::glue(" * {input$covar}"))
+      if (input_covar() != "1")
+        string <- string %>%  paste(., glue::glue(" * {input_covar()}"))
 
       as.formula(string)
     })
@@ -164,10 +173,10 @@ LA_standard_reactives <-
     get_trial <<- reactive({
       Tmp <-
         if (input$resample) get_resample()
-      else get_a_sample(as.numeric(input$samp_size),
+      else get_a_sample(get_sample_size(),
                         input$stratify,
                         input$var_x,
-                        c(input$var_y, input$var_x, input$covar),
+                        c(input$var_y, input$var_x, input_covar()),
                         the_data$frame,
                         seed = Sys.time())
 
@@ -237,15 +246,17 @@ LA_standard_observers <-
       req(input$frame)
       n_possible <- c(outer( c(1, 2, 5), c(10, 100, 1000, 10000), FUN = "*"))
       n_possible <- n_possible[ n_possible != nrow(req(the_data$frame))]
-      n_possible <- c(2, 5, n_possible[n_possible <= nrow(the_data$frame)],
-                      nrow(req(the_data$frame)))
+      # -1 is a flag for "all the data" Can't use Inf for some reason
+      n_possible <- c(2, 5, n_possible[n_possible <= nrow(the_data$frame)], -1)
       choices <- as.list(n_possible)
       names_for_choices <- choices
       names_for_choices[length(names_for_choices)] <- "Sampling frame (all the data)"
       names(choices) <- names_for_choices
       names(choices)[length(choices)] <- "Sampling frame (all the data)" # IS THIS REDUNDANT?
-      updateSelectInput(session, "samp_size",
-                        choices = choices, selected = 50)
+      if ("samp_size" %in% names(input)) {
+        updateSelectInput(session, "samp_size",
+                          choices = choices, selected = 50)
+      }
     })
 
     # delete all trials  when new sample or accumulate_trials is turned  off

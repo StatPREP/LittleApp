@@ -52,9 +52,9 @@ The input widgets for the user's choices have standard names, which you should u
 * `input$frame`: the name  of the data frame
 * `input$var_y`: name of the response variable, always shown on the y-axis of the graph. (character string)
 * `input$var_x`: name of the explanatory variable to be used for the x-axis of the graph. (character string)
-* `input$covar`: name(s) of any covariates selected (character string vector with, potentially multiple elements.) If there is no covariate selected, the value is `.none`.
-* `input$sample_size`: the  size of the sample. (character string)
-* `input$stratify`: whether to stratify the sample according to the explanatory variable (if it's categorical). The total sample size will be the number of groups defined by the explanatory variable times `input$sample_size()`
+* `input_covar()`: name(s) of any covariates selected (character string vector with, potentially multiple elements.) If there is no covariate selected, the value is `.none`.
+* `input_sample_size()`: the  size of the sample. (character string)
+* `input_stratify()`: whether to stratify the sample according to the explanatory variable (if it's categorical). The total sample size will be the number of groups defined by the explanatory variable times `input$sample_size()`
 * `input$new_sample`: triggered when the user presses the new-sample button.
 
 ## Default values for uncommonly used inputs

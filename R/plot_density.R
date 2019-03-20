@@ -40,7 +40,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
                                       "common", "uncommon_right", "rare_right"),
                            kill_in_labels = "_.+$", # ".+" to kill entirely
                            show_percent = TRUE,
-                           vwidth = 0.35,
+                           vwidth = 0.4,
                            max_x_levels = 10) {
   if (length(unique(xvar)) > max_x_levels)  stop("Too many levels. See argument max_x_levels.")
   # Split up yvar by levels of xvar
@@ -136,7 +136,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
         gf_segment(x + x ~ left + right, data = Stripes, color = "white", alpha = 0.75)
     }
     P <- P %>%
-      gf_text(x ~ level, label = ~short, data = Labels) %>%
+      gf_label(x ~ level, label = ~short, data = Labels, color = ~ label, fill = "white", alpha = 0.5) %>%
       gf_theme(
         scale_y_continuous(
           sec.axis = sec_axis( ~ (. - grand_mean) / grand_sd, name = "z values",

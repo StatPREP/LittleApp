@@ -9,7 +9,7 @@ plot_density_y(yvar = NULL, xvar = "all", violin = FALSE,
   show_normal = FALSE, breaks = c(-3, -2, 2, 3), qbreaks = NULL,
   labels = c("rare_left", "uncommon_left", "common", "uncommon_right",
   "rare_right"), kill_in_labels = "_.+$", show_percent = TRUE,
-  vwidth = 0.35, max_x_levels = 10)
+  vwidth = 0.4, max_x_levels = 10)
 }
 \arguments{
 \item{violin}{Logical flag specifying whether the graph should have the

@@ -4,7 +4,7 @@
 \alias{LA_data_source}
 \title{Basic control blocks for Little Apps}
 \usage{
-LA_data_source(width = 12, collapsed = FALSE)
+LA_data_source(width = 12, collapsed = FALSE, covariate = TRUE)
 }
 \arguments{
 \item{width}{1-12 twitter bootstrap width of control}
