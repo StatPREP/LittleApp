@@ -10,10 +10,11 @@
 #' @export
 LA_var_types <- function(.data) {
   f <- function(x) {
-    data.frame(numeric = is.numeric(x),
+    tibble(numeric = is.numeric(x),
                class = class(x)[1],
                n_levels = length(unique(na.omit(x))),
-               stringsAsFactors = FALSE)
+               stringsAsFactors = FALSE) %>%
+      mutate(spread = ifelse(numeric, sd(x, na.rm = TRUE),  0))
   }
   Tmp <- lapply(.data, f)
 

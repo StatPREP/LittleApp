@@ -31,13 +31,14 @@ LA_body <- function(..., plot_widget = NULL) {
       plot_widget,
     HTML("<br>"),
     tabBox(
-      title = "Info", width = 12,
+      title = " . ", width = 12,
       # The id lets us use input$tabset1 on the server to find the current tab
       id = "tabset1", height = "100px",
-      tabPanel("Codebook", htmlOutput("codebook")),
-      tabPanel("Statistics", htmlOutput("statistics")),
       tabPanel("Explain", htmlOutput("explain")),
+      tabPanel("Codebook", htmlOutput("codebook")),
       ...,
+      tabPanel("Statistics", htmlOutput("statistics")),
+
       tabPanel("R commands", htmlOutput("rcode")),
       tabPanel("Debug",
                textOutput("debug_text"),

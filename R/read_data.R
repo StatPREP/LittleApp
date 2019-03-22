@@ -34,8 +34,8 @@ LA_read_data <- function(data_name = "Health", package = "littleapp2") {
       stop("Ordinary data files should have a single item: a data frame.")
     this_env$frame <- this_env[[contents]]
   }
-  #cat("Setting up types\n")
-  if (! "types" %in% contents) this_env$types <- LA_var_types(this_env$frame)
+  # Setting up types
+  this_env$types <- LA_var_types(this_env$frame)
   #cat("Setting up documentation\n")
   if (! "codebook" %in% contents) {
     # get documentation from package

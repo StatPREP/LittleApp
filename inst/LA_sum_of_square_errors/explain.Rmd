@@ -1,0 +1,62 @@
+# Sum of square errors and model training
+
+```{r include = FALSE}
+SDSdata::sds_setup()
+```
+
+Training a model is about arranging the model to have the best prediction performance. For a straight-line model, "arranging" means choosing a slope and vertical position (intercept) for the line. The straight line  model itself is a function that takes the explanatory variable as the input and produces a value corresponding to the response variable. In other words, the model is a formula
+
+$$\mbox{model output} = m \times \mbox{input} + b$$
+
+For each possible choice of slope and intercept, the performance is assessed with a *training* data set which has known values for the  response and explanatory variables. The prediction error is  
+$$\mbox{prediction error} = \mbox{response} - \mbox{model output} = m \times \mbox{input} + b$$
+The graphic below shows data (black dots) along  with a possible straight  line  model and the model output (empty dots). The line connecting each data point to its corresponding model value shows the prediction error. Sometimes the error is negative (shown in red),  sometimes positive (shown in blue). For a few of the data points,  the model error is shown numerically in the shaded box.
+
+```{r resid_plot, echo  = FALSE, fig.align = "center"}
+set.seed(101)
+The_data = Galton %>% sample_n(size = 20) %>%
+  mutate(mother = mother  + runif(nrow(.), min = -1.5, max = 1.5))
+mod = lm(height ~ mother, data = Galton)
+Pts <- mod_eval(mod, data  = The_data) %>%
+  mutate(sign = model_output < height) %>%
+  mutate(error = height - model_output) %>%
+  mutate(midpoint = height) %>%
+  mutate(group = round(mother))
+gf_line(model_output ~ mother, data = Pts) %>%
+  gf_errorbar(model_output + height ~ mother, color = ~ sign, data = Pts) %>%
+  gf_point(height ~ mother, data  = Pts, shape = 20, size = 2.5) %>%
+  gf_point(model_output ~ mother, data = Pts, shape = 21, size = 2, fill = "white") %>%
+  gf_theme(legend.position = "none") %>%
+  gf_label(midpoint ~ mother, label = ~ round(error, 1), 
+           data = Pts %>% group_by(group) %>% sample_n(1), 
+           hjust  = .8, alpha = .5, color = "black", fill = ~ sign, vjust = ~ !sign) %>%
+  gf_labs(y = "Response variable", x = "Explanatory variable")
+  
+  
+```
+
+The term  "sum of square errors" describes exactly the process of calculation. The result is a *single number* describing how close the proposed model line is to the data. The errors are squared so that the negative errors don't cancel out the positive ones. (There's also a subtle link between squaring and the gaussian probability distribution.) 
+
+## Using the App
+
+Choose quantitative  response and explanatory variables and the sample size in the same way as in the other Little Apps. The main graphic shows the sample as a point plot. It also displays five proposed straight-line models (in five different colors) for describing the relationship between the response and explanatory variables. 
+
+For each of the proposed  models  individually, the sum of square errors is calculated. The result is shown in the *Statistics* tab, which gives the slope, intercept, and sum of square errors for the five lines identified by color in the main plot.
+
+Note that line A will always have the smallest SSE. Line A (red) is the best-fitting straight-line model, that is the straight line having the smallest SSE of all the infinite possibilities for lines of different slopes and intercepts.
+
+The other four lines shown in the main graphic are specified by the two sliders in the *Straight-line controls*. Those sliders let  you specify two slopes  and two vertical positions. The four lines B, C, D, and E correspond  to the four combinations to be made out of two slopes and two vertical positions. Moving any of the sliders changes the position of the corresponding lines in the graphic. In  addition to changing the graphic, the SSE shown in the *Statistics* tab will be updated.  
+
+Two other aspects of the App:
+
+1. You can turn on  the display of a 95% confidence band around the best fitting line A using  the checkbox under the sliders.
+2. The *SSE* tab shows a graphic of the SSE for each of the four lines. The  SSE for the training data is shown as a horizontal bar. An SSE is also calculated for each of the five lines using about 20 *testing* datasets. Each testing dataset generates one dot for each of the five lines. This display also updates as you move the sliders controlling the slopes and vertical positions of the lines B, C, D, and E.
+
+## Notes for a lesson (in draft)
+
+* Line A will always have the smallest in-sample SSE. That's how the best-fitting line is selected.
+* The in-sample SSE tends to underestimate the SSE from  out-of-sample data.
+* Larger sample size $n$ tends to increase the difference in SSE between line A and the other lines.
+* When two of the lines have substantial overlap between their clouds of out-of-sample SSE, the two  lines are statistically indistinguishable.
+* Lines that are statistically indistinguishable  from line A are contained  within the 95% confidence band drawn around line  A.
+* Strictly speaking, when  using the training data for testing, the deviations between the model values and the response variable are called  *residuals*. The out-of-sample deviations between model values and the response are properly called *errors*.

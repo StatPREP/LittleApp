@@ -5,6 +5,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(littleapp2)
 library(markdown)
 library(mosaic)
@@ -12,15 +13,16 @@ library(ggformula)
 
 # App-specific controls
 jitter_controls <-
-  box(title = "Jitter controls", width = 12, background = "black",
+  box(title = "Jitter controls", width = 6, background = "black",
       status = "primary", solidHeader = TRUE,
       collapsible = FALSE, collapsed = FALSE,
-      sliderInput("jitter_width",  "Jitter width",
-                  min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
-      sliderInput("jitter_height", "Jitter height",
-                  min = 0, max = 1, value = 0.0) %>% tighten(bottom = -10),
-      sliderInput("jitter_alpha",  "Transparency",
-                  min = 0, max = 1, value = 1) %>% tighten(bottom = -10),
+      noUiSliderInput("jitter_width",  "Jitter width",
+                  min = 0, max = 1, value = 0.0) ,
+      noUiSliderInput("jitter_height", "Jitter height", orientation  = "vertical",
+                  min = 0, max = 1, value = 0.0, height = "200px", direction = "rtl"),
+      noUiSliderInput("jitter_alpha",  "Transparency",
+                  min = 0, max = 1, value = 1),
+      hr(),
       checkboxInput("violin", "Show violin plot") %>%
         tighten(bottom = -10)
   )
@@ -33,11 +35,10 @@ UI <- function(request) { #for bookmarking
     ),
     dashboardSidebar(
       width = 350,
-      LA_data_source(6),
-      LA_sample_ui(6),
-      # LA_inference(6),
-      jitter_controls
-      #, bookmarkButton()
+      p(" "),
+      jitter_controls,
+      LA_data_source(6, covariate = FALSE),
+      LA_sample_ui(6)
     ),
 
     LA_body()
