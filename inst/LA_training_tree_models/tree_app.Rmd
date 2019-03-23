@@ -15,7 +15,6 @@ library("SDSdata")
 library("littleapp2")
 library("dplyr")
 library("mosaic")
-Frame <<- reactiveVal()
 ```
 
 ```{r echo = FALSE}
@@ -24,174 +23,134 @@ tableOutput("debug_table")
 
 ```{r echo = FALSE}
 Raw_data <- reactive({
+  cat("one\n")
   mosaicData::CPS85 %>% dplyr::select(wage, educ, sector, sex) %>%
     filter(wage < 40)
 })
-observe({
+Frame <- reactive({
   # Update the data frame
-  cat("Engering\n")
-  req(input$var_one, input$var_two_L, input$var_two_R)
+  cat("two\n")
   Base <- Raw_data()
-  # Set the level-one split
-  cat("A\n")
-  x <- Base[[input$var_one]]
-  if ("level_one" %in% names(input)) {
-    cat("D\n")
-    Base$one <- ifelse(x <= input$level_one, "L", "R")
-  } else if ("set_one" %in% names(input)) {
-    cat("C\n")
-    if (is.null(input$set_one)) Base$one <- "R"
-    else Base$one <- ifelse(x %in% input$set_one, "L", "R")
+  if (is.null(input$level_one) && is.null(input$set_one)) {
+    return(Base %>% mutate(one = "R", two = "R"))
   }
-  cat("B\n")
+  
+  req(input$var_one, input$var_two_L, input$var_two_R)
+
+  x <- Base[[input$var_one]]
+  Base$one <-
+    if ("level_one" %in% names(input) && var_type(x) == "quantitative") {
+      ifelse(x <= input$level_one, "L", "R")
+    } else if ("set_one" %in% names(input)) {
+      if (is.null(input$set_one))  "R"
+      else ifelse(x %in% input$set_one, "L", "R")
+    }
+ 
   # Set the level two L split
   Base$two <- "R"
+  x  <- Base[[input$var_two_L]]
   lefties <- which(Base$one == "L")
-  if ("level_two_L" %in% names(input)) {
-    cat("DLL\n")
+  cat("There are", length(lefties), "lefties\n")
+  if ("level_two_L" %in% names(input) && var_type(x) == "quantitative") {
+    cat("Using level_two_L at value", input$level_two_L, "\n")
     Base$two[lefties] <- ifelse(x[lefties] <= input$level_two_L, "L", "R")
-  } else if ("set_one" %in% names(input)) {
-    cat("CLL\n")
-    if (is.null(input$set_one)) Base$two[lefties] <- "R"
+  } else {
+    if (is.null(input$set_two_L)) Base$two[lefties] <- "R"
     else Base$two[lefties] <- ifelse(x[lefties] %in% input$set_two_L, "L", "R")
   }
   # Set the level two R split
   righties <- which(Base$one == "R")
-  if ("level_two_R" %in% names(input)) {
-    cat("DRR\n")
+  x <- Base[[input$var_two_R]]
+  if ("level_two_R" %in% names(input) && var_type(x) == "quantitative") {
     Base$two[righties] <- ifelse(x[righties] <= input$level_two_R, "L", "R")
-  } else if ("set_two_R" %in% names(input)) {
-    cat("CLL\n")
+  } else {
     if (is.null(input$set_two_R)) Base$two[righties] <- "R"
     else Base$two[righties] <- ifelse(x[righties] %in% input$set_two_R, "L", "R")
   }
-  output$debug_table <- renderTable(Base)
-  cat("Length of one is", length(Base$one), "\n")
-  cat("Length of two is", length(Base$two), "\n")
-  cat(paste(capture.output(table(Base$one)), collapse = "\n"), "\n")
-  cat(paste(capture.output(table(Base$two)), collapse = "\n"), "\n")
-  cat(paste(names(Base), collapse = ", "), "\n")
-  #Base  %>% group_by(one, two) %>% tally()
-  Frame(Base) # set the value
+
+  return(Base) # set the value
 })
+
+
 Data_R <- reactive({
-  Frame() %>% filter(one == "R")
+  cat("four\n")
+  if (is.null(Frame())) return()
+  req(Frame()) %>% filter(one == "R")
 })
 Data_L <- reactive({
-  Frame() %>% filter(one == "L")
+  cat("five\n")
+  if (is.null(Frame())) return()
+  req(Frame()) %>% filter(one == "L")
 })
 Data_RR <- reactive({
-  cat("getting data_RR()\n")
-  cat("Names are", paste(names(Frame()), collapse = ", "), "Data RR  \n")
-  Frame() %>% filter(one == "R", two == "R")
+  req(Frame())
+  cat("six\n")
+  if (is.null(Frame())) { 
+    
+    return()
+    }
+  req(Frame()) %>% filter(one == "R", two == "R")
 })
 Data_RL <- reactive({
-  cat("getting data_RL()\n")
-  cat("Names are", paste(names(Frame()), collapse = ", "), "Data RL  \n")
-  Frame() %>% filter(one == "R", two == "L")
+  cat("seven\n")
+  req(Frame())
+  if (is.null(Frame())) { 
+    return()
+    }
+    req(Frame()) %>% filter(one == "R", two == "L")
 })
 Data_LL <- reactive({
-  cat("getting data_LL()\n")
-  cat("Names are", paste(names(Frame()), collapse = ", "), "Data LL  \n")
-  Frame() %>% filter(one == "L", two == "L")
+  cat("eight\n")
+  if (is.null(Frame())) { 
+    return()
+    }
+  req(Frame()) %>% filter(one == "L", two == "L")
 })
 Data_LR <- reactive({
-  cat("getting data_L$()\n")
-  cat("Names are", paste(names(Frame()), collapse = ", "), "Data RL  \n")
-  Frame() %>% filter(one == "L", two == "R")
+  cat("nine\n")
+  if (is.null(Frame())) { 
+    return()
+    }
+  req(Frame()) %>% filter(one == "L", two == "R")
 })
-
-
-
-The_data <- reactive({ 
-  Res <- Raw_data() 
-  
-  if (!req(input$var_one) %in% names(Res)) stop("Need to choose variable one")
-  v1 <- Res[[req(input$var_one)]]
-  
-  if (var_type(v1) == "quantitative") {
-    Res$..one <- ifelse(v1 <= req(input$level_one), "L", "R")
-  } else {
-    Res$..one <- ifelse(v1 %in% req(input$set_one), "L", "R")
-  }
-
-  cat("Finished with 'The_data()'\n")
-  Res
-  
-})
-One_left_data <- reactive({
-  cat("Entering one_left_data\n")
-  Res <- The_data() %>% filter(..one == "L") 
-  v2 <- Res[[req(input$var_two_L)]]
-  cat("Got the data with", nrow(Res), "rows \n")
-  if ("level_two_L" %in% names(input) && var_type(v2) == "quantitative") {
-     Res$..two <- ifelse(v2 <= req(input$level_two_L), "L", "R")
-     cat("Input level two L is ", req(input$level_two_L), "\n")
-  } else if ("set_two_L" %in% names(input) && var_type(v2) == "categorical") {
-     Res$..two <- ifelse(v2 %in% req(input$set_two_L), "L", "R")
-  }  
-  
-  cat("Variable two L is", input$var_two_L, "\n")
-  
-  
-  Res
-})
-
-
-
-One_right_data <- reactive({
-  Res <- The_data() %>% filter(..one == "R") 
-  v2 <- Res[[req(input$var_two_R)]]
-  cat("Got the data with", nrow(Res), "rows \n")
-  if ("level_two_R" %in% names(input) && var_type(v2) == "quantitative") {
-     Res$..two <- ifelse(v2 <= req(input$level_two_L), "L", "R")
-     cat("Input level two R is ", req(input$level_two_R), "\n")
-  } else if ("set_two_R" %in% names(input) && var_type(v2) == "categorical") {
-     Res$..two <- ifelse(v2 %in% req(input$set_two_R), "L", "R")
-  }  
-  
-  cat("Variable two L is", input$var_two_L, "\n")
-  
-  Res
-})
-var_names <- reactive({names(Raw_data())})
 ```
 
 
 ```{r echo = FALSE}
 # Input widgets
 get_vars <- function(){c("educ", "sector")}
-var_one <- pickerInput("var_one", "Split by:",  
-                       choices = get_vars(), inline = TRUE,
-                       width = "150px")
-level_one  <- noUiSliderInput("level_one", "Choose split levels:", 
-                          min = 0, max = 20, value = 10,
-                          inline = TRUE, width = "200px")
+
+one_control   <- uiOutput(  "one_control", inline = TRUE)
+two_L_control <- uiOutput("two_L_control", inline = TRUE)
+two_R_control <- uiOutput("two_R_control", inline = TRUE)
+
+var_one   <- pickerInput("var_one", "Split by:", choices = get_vars(), 
+                         inline = TRUE, width = "150px")
+var_two_L <- pickerInput("var_two_L", "Split by:", choices = get_vars(), 
+                         inline = TRUE, width = "150px")
+var_two_R <- pickerInput("var_two_R", "Split by:", choices = get_vars(), 
+                         inline = TRUE, width = "150px")
+
+level_one   <- noUiSliderInput("level_one", "Choose split levels:",  
+                               min = 0, max = 20, value = 10, 
+                               inline = TRUE, width = "200px")
+level_two_L <- noUiSliderInput("level_two_L", "Choose split levels:", 
+                               min = 0, max = 20, value = 0, 
+                               inline = TRUE, width = "200px")
+level_two_R <- noUiSliderInput("level_two_R", "Choose split levels:", 
+                               min = 0, max = 20, value = 0, 
+                               inline = TRUE, width = "200px")
+
 set_one <- pickerInput("set_one", "Choose levels to be on left", 
                        choices = LETTERS[1:2],  selected = "A", multiple = TRUE,
                        inline = TRUE)
-
-one_control <- uiOutput("one_control", inline = TRUE)
-two_L_control <- uiOutput("two_L_control", inline = TRUE)
-two_R_control <- uiOutput("two_R_control", inline = TRUE)
-var_two_L <- pickerInput("var_two_L", "Split by:",  
-                       choices = get_vars(), inline = TRUE,
-                       width = "150px")
-level_two_L <- noUiSliderInput("level_two_L", "Choose split levels:", 
-                          min = 0, max = 20, value = 0,
-                          inline = TRUE, width = "200px")
 set_two_L <- pickerInput("set_two_L", "Choose levels to be on left", 
                        choices = LETTERS[1:2],  selected = "A", multiple = TRUE,
                        inline = TRUE)
-var_two_R <- pickerInput("var_two_R", "Split by:",  
-                       choices = get_vars(), inline = TRUE,
-                       width = "150px")
-level_two_R <- noUiSliderInput("level_two_R", "Choose split levels:", 
-                          min = 0, max = 20, value = 0,
-                          inline = TRUE, width = "200px")
 set_two_R <- pickerInput("set_two_R", "Choose levels to be on left", 
-                       choices = LETTERS[1:2], selected = "B",  multiple = TRUE,
+                       choices = LETTERS[1:3], selected = "B",  multiple = TRUE,
                        inline = TRUE)
+
 
 ```
   
@@ -275,101 +234,107 @@ standard_plot <- function(yvar = "wage", xvar = "educ", zvar = "sector",
 
 ```{r echo = FALSE}
 output$whole_model <- renderPlot({
-  # Need to change this to add in model
-  standard_plot(data = The_data(), show_legend = TRUE)
+  req(Frame())
+  Model_vals <- Frame() %>% 
+    group_by(one, two) %>% 
+    summarise(model_val = mean(wage, na.rm = TRUE), count = n()) 
+  #   summarize(model_output = mean(wage, na.rm = TRUE))
+  output$debug_table <- renderTable({Model_vals})
+  Frame() %>%
+    mutate(group = cross(one, two)) %>%
+    group_by(group) %>%
+    mutate(model_output = mean(wage, na.rm = TRUE))  %>%
+    gf_line(model_output ~ educ, color = ~ group)
+    # group_by(one, two) %>%
+    # mutate(model_output = mean(wage, na.rm = TRUE)) %>%
+    # gf_line(model_output ~ educ, color = ~ sector)
+  #standard_plot(yvar = "model_output", data = Frame(), show_legend = TRUE)
   },
   width = 500, height = 375
 )
 output$all <- renderPlot({
-  shinyjs::hide("var_one")
-  standard_plot(data = The_data(), show_legend = TRUE)
+  req(Frame())
+  cat("eleven\n")
+  if (is.null(Frame())) return()
+  
+  standard_plot(data = Frame(), show_legend = TRUE)
   },
   width = 500, height = 375
 )
 
 observeEvent(req(input$var_one), {
-  x <- Raw_data()[[req(input$var_one)]]
+  
+  x <- req(Frame())
+  cat("twelve\n")
+  if (is.null(x)) return()
+
+  x <- Frame()[[input$var_one]]
   if (var_type(x) == "quantitative") {
     output$one_control <- renderUI({level_one})
-    cat("Setting up level_one\n")
-    var_range <- range(x)
-    cat("A\n")
-    old_value <- isolate(req(input$level_one))
-    cat("B\n")
-    new_value <- 
-      if (old_value >= var_range[1] && old_value <= var_range[2])  { old_value
-      } else  {mean(var_range)}
-    cat("new_value is", new_value, "\n")
+    var_range <- range(x, na.rm = TRUE)
     updateNoUiSliderInput(session, "level_one",
                           range = var_range,
-                          value = new_value)
-    cat("Returning level_one\n")
+                          value = mean(var_range))
   } else {
     output$one_control <- renderUI(set_one)
-    cat("Setting up set_one\n")
-    active_levels <- unique(x)
-    cat("Active levels are", paste(active_levels, collapse = ", "), "\n")
+    active_levels <- unique(as.character(x))
+    
     choice_list <- as.list(active_levels)
     names(choice_list) <- active_levels
-    cat("Got to D\n")
-    if (!is.null(isolate(input$set_one)) && all(isolate(input$set_one) %in% active_levels)) 
-      selected <- isolate(input$set_one)
-    else
-      selected <- active_levels[1]
-    
-    cat("Selected is", selected, "\n")
+
     updatePickerInput(session, "set_one",
                       choices = choice_list,
-                      selected = selected)
-    cat("Finished update\n")
+                      selected = active_levels[1])
   }
-
 })
 
 
 observeEvent(req(input$var_two_L), {
-  cat("Setting control two L\n")
-  x <- One_left_data()[[input$var_two_L]]
-  cat("Variable two_")
-  cat("Testing x\n")
+  cat("twelve_L\n")
+  x <- req(Frame())
+  if (is.null(x)) return()
+
+  x <- Frame()[[input$var_two_L]]
   if (var_type(x) == "quantitative") {
-    cat("Two_L quantitative\n")
     output$two_L_control <- renderUI({level_two_L})
-    var_range <- range(x)
-    old_value <- isolate(input$level_two_L)
-    cat("Old value is", capture.output(old_value), "\n")
-    new_value <- 
-      if (old_value >= var_range[1] && old_value <= var_range[2])  { old_value
-      } else  {mean(var_range)}
-    cat("new_value is", new_value, "\n")
+    var_range <- range(x, na.rm = TRUE)
     updateNoUiSliderInput(session, "level_two_L",
                           range = var_range,
-                          value = new_value)
-    cat("Returning level_two_L\n")
+                          value = mean(var_range))
   } else {
-    cat("Two_L categorical\n")
-    old_selected <- isolate(input$set_two_L)
-    cat("Old selected is", capture.output(old_selected), "\n")
     output$two_L_control <- renderUI(set_two_L)
-    cat("Setting up set_two_L\n")
-    active_levels <- unique(x)
-    cat("Active levels are", paste(active_levels, collapse = ", "), "\n")
-    
+    active_levels <- unique(as.character(x))
     choice_list <- as.list(active_levels)
     names(choice_list) <- active_levels
-    cat("Got to D\n")
-    if (!is.null(old_selected) && all(old_selected %in% active_levels)) 
-      selected <- old_selected
-    else
-      selected <- active_levels[1]
-    
-    cat("Selected is", selected, "\n")
     updatePickerInput(session, "set_two_L",
                       choices = choice_list,
-                      selected = selected)
-    cat("Updated the picker and selected is", selected, "\n")
+                      selected = active_levels[1])
   }
+})
 
+observeEvent(req(input$var_two_R), {
+  cat("twelve_R\n")
+  x <- req(Frame())
+  if (is.null(x)) return()
+
+  x <- Frame()[[input$var_two_R]]
+  
+  if (var_type(x) == "quantitative") {
+    output$two_R_control <- renderUI({level_two_R})
+    var_range <- range(x, na.rm = TRUE)
+    updateNoUiSliderInput(session, "level_two_R",
+                          range = var_range,
+                          value = mean(var_range))
+  } else {
+    output$two_R_control <- renderUI(set_two_R)
+    active_levels <- unique(as.character(x))
+    choice_list <- as.list(active_levels)
+    names(choice_list) <- active_levels
+    updatePickerInput(session, "set_two_R",
+                      choices = choice_list,
+                      selected = active_levels[1])
+  }
+  
 })
 
 
@@ -380,76 +345,44 @@ var_type <- function(x) {
 
 
 
-
-
-observe({
-  x <- The_data()[[req(input$var_two_L)]]
-  if (var_type(x) == "quantitative") {
-    var_range <- range(x)
-    updateNoUiSliderInput(session, "level_two_L",
-                          range = var_range,
-                          value = mean(var_range))
-  } else {
-    active_levels <- as.list(unique(x))
-    names(active_levels) <- unlist(active_levels)
-    if (input$set_two_L %in% unlist(active_levels)) 
-      selected = input$set_two_L
-    else 
-      selected = active_levels[[1]]
-    updatePickerInput(session, "set_two_L",
-                      choices = as.list(active_levels),
-                      selected = selected)
-  }
-})
-
-observe({
-  x <- The_data()[[req(input$var_two_R)]]
-  if (var_type(x) == "quantitative") {
-    var_range <- range(x)
-    updateNoUiSliderInput(session, "level_two_R",
-                          range = var_range,
-                          value = mean(var_range))
-  } else {
-    active_levels <- as.list(unique(x))
-    names(active_levels) <- unlist(active_levels)
-    selected <- active_levels[1]
-    updatePickerInput(session, "set_two_R",
-                      choices = as.list(active_levels),
-                      selected = selected)
-  }
-})
 ```
 
 ```{r echo = FALSE}
 output$one_right <- renderPlot({
+  cat("fifteen\n")
   standard_plot(data = Data_R(), show_legend = FALSE)
   },
   width = 400, height = 300
 )
 output$one_left <- renderPlot({
+  cat("sixteen\n")
   standard_plot(data = Data_L(), show_legend = FALSE)
   },
   width = 400, height = 300
-)  
+)
 
 output$two_LL <- renderPlot({
+  cat("seventeen\n")
   standard_plot(data = Data_LL(), show_legend = FALSE)
 },
   width = 200, height = 300
 )
 output$two_LR <- renderPlot({
+  cat("eighteen\n")
   standard_plot(data = Data_LR(), show_legend = FALSE)
   },
   width = 200, height = 300
-)  
+)
 output$two_RL <- renderPlot({
+  cat("nineteen\n")
   standard_plot(data = Data_RL(), show_legend = FALSE)
   },
   width = 200, height = 300
 )
 output$two_RR <- renderPlot({
+  cat("twenty\n")
   standard_plot(data = Data_RR(), show_legend = FALSE)
   },
   width = 200, height = 300
-) 
+)
 ```
