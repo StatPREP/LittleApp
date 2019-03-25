@@ -27,10 +27,11 @@ smoother_plot <- function(plot_formula, model_formula, data,
   response_name <- as.character(rlang::f_lhs(plot_formula))
   # Get the model functions for plotting
   mod <- lm(model_formula, data = data)
-  # Construct points over the full range of the model
+  # Construct points over the full range of the model for the line
   mod_fun_data <- mosaicModel::mod_eval(mod, nlevels = Inf)
   # Construct model output at data points
   mod_vals <- mosaicModel::mod_eval(mod, data = data)
+  # figure out where to plot the horizontal bars on the right
   x_range <- range(mod_fun_data[[explan_name]])
   ebar_width <- diff(x_range) / 15
   x_max <- x_range[2] + 0.25 * diff(x_range)
@@ -57,7 +58,7 @@ smoother_plot <- function(plot_formula, model_formula, data,
                 width = 1*ebar_width, color = "red", alpha = 0.25)
   P <- P %>%
     gf_errorbar(base + top ~ x, data = std_bars,
-                width = ebar_width/2, size = 2, color = "black", alpha = 1.0)
+                width = ebar_width/2, size = 1.5, color = I(c("blue", "black")), alpha = 1.0)
 
   # # confidence bands
   # # gf_ribbon() not working for some unknown reason.

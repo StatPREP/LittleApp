@@ -34,7 +34,7 @@ my_special_controls <-
 UI <- function(request) { #it's a function  for bookmarking
   dashboardPage(
     dashboardHeader(
-      title = "Linear models",
+      title = "Regression models",
       titleWidth = "90%"
     ),
     dashboardSidebar(
@@ -72,8 +72,6 @@ SERVER <- function(input, output, session) {
   })
 
   output$main_plot <- renderPlot({
-
-
     smoother_plot(get_frame_formula(),
                   model_formula(),
                   get_sample(), color = get_color_formula(),
