@@ -130,7 +130,7 @@ LA_standard_reactives <-
       req(input$var_x) == "1"
     })
     no_covariate <<- reactive({
-      req(input_covar() == "1")
+      req(input_covar()) == "1"
     })
     #  no interaction
     get_model_formula <<- reactive({

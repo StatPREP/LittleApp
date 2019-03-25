@@ -7,6 +7,6 @@ LA_available_data <- function() {
        Births_2014 = "Births_2014:SDSdata",
        CPS85 = "CPS85:mosaicData",
        diamonds = "diamonds:ggplot2",
-       SAT_test = "SAT:mosaicData"
+       SAT_test = "SATx:SDSdata"
        )
 }
