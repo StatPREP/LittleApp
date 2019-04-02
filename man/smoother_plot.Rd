@@ -6,7 +6,7 @@
 \usage{
 smoother_plot(plot_formula, model_formula, data, color = "black",
   width = 0, height = 0, alpha = 0.5, trace_vert = TRUE,
-  trace_horiz = TRUE, show_mod_vals = TRUE)
+  trace_horiz = TRUE, show_mod_vals = TRUE, ruler = NULL)
 }
 \arguments{
 \item{plot_formula}{A formula of the form y ~ x}

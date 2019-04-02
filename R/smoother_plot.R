@@ -22,7 +22,8 @@
 smoother_plot <- function(plot_formula, model_formula, data,
                           color = "black", width = 0, height = 0, alpha  = 0.5,
                           trace_vert = TRUE, trace_horiz = TRUE,
-                          show_mod_vals = TRUE) {
+                          show_mod_vals = TRUE,
+                          ruler = NULL) {
   explan_name <- as.character(rlang::f_rhs(plot_formula))
   response_name <- as.character(rlang::f_lhs(plot_formula))
   # Get the model functions for plotting
@@ -86,6 +87,28 @@ smoother_plot <- function(plot_formula, model_formula, data,
                           data = mod_vals,
                           color = "black", size = 0.1)
 
+  if ( ! is.null(ruler)) {
+    height <- signif(ruler$ymax - ruler$ymin, 3)
+    Ruler_info <- data.frame(ymin = ruler$ymin,
+                             ymax = ruler$ymax,
+                             ymid = (ruler$ymin + ruler$ymax) / 2,
+                             x = 0.8, stringsAsFactors = FALSE,
+                             label = glue::glue("Top: {signif(ruler$ymax,3)} \nHeight: {height} \nBottom: {signif(ruler$ymin,3)} "))
+
+    # Gosh! I don't know why I need to  do it this way, in raw ggplot
+    P <- P  +
+      geom_segment(aes(y = Ruler_info$ymin,
+                       yend = Ruler_info$ymax,
+                       x = max(x_range),
+                       xend = max(x_range)),
+                   color  = "black",
+                   arrow = arrow(ends = "both", length = unit(0.1, "inches"))) +
+      geom_text(aes(y = Ruler_info$ymid,
+                    x = max(x_range),
+                    label = Ruler_info$label),
+                color = "black",
+                hjust = 1)
+  }
 
 
   P

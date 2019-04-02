@@ -46,7 +46,10 @@ UI <- function(request) { #it's a function  for bookmarking
       #, bookmarkButton()
     ),
 
-    LA_body() # The body is entirely pre-defined
+    LA_body(
+      plot_widget = plotOutput("main_plot", height = "400px",
+                                brush = brushOpts(id="yruler",  direction  = "y"))
+    )
   )
 }
 
@@ -77,7 +80,8 @@ SERVER <- function(input, output, session) {
                   get_sample(), color = get_color_formula(),
                   trace_vert = input$trace_vertically,
                   trace_horiz = input$trace_horizontally,
-                  show_mod_vals = input$show_model_values) %>%
+                  show_mod_vals = input$show_model_values,
+                  ruler = input$yruler) %>%
       gf_lims(y = get_y_range()) # to keep scale constant across samples
 
     })

@@ -2,7 +2,7 @@
 #'
 #' @export
 LA_available_data <- function() {
-  list(Health = "Health:littleapp2",
+  list(NHANES = "NHANES:NHANES",
        Galton = "Galton:mosaicData",
        Births_2014 = "Births_2014:SDSdata",
        CPS85 = "CPS85:mosaicData",
