@@ -106,7 +106,21 @@ SERVER <- function(input, output, session) {
     output$statistics <- renderText({
       HTML(includeHTML("statistics.html"))
     })
-  }
+
+    observe({ # Make vertical jittering on a reasonable scale for numeric variables
+      old_val <- input$jitter_height
+      jitter_amt <- if (req(get_response_type()) == "numeric") {
+        possibilities <- pretty(abs(diff(range(req(get_response_var())))) / 10)
+        possibilities[possibilities > 0][1]
+      } else 1
+
+      if (old_val > jitter_amt) old_val <- 0
+
+      updateNoUiSliderInput(session, "jitter_height", range = c(0, jitter_amt),
+                        value = old_val)
+    })
+
+}
 
 shinyApp(UI, SERVER, enableBookmarking = "url")
 

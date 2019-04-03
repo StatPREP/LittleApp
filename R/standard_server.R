@@ -61,12 +61,12 @@ LA_standard_reactives <-
     get_response_type <<- reactive({
       # categorical, numeric, logical, probability
       if (input$var_y == "1") return("invalid") # not yet initialized
-      Y <- get_sample()[input$var_y]
+      Y <- get_response_var()
       if (!is.numeric(Y)) {
         if (is.logical(Y)) return("logical")
         else return("categorical")
       } else {
-        if (min(x) >= 0 && max(x) <= 1) return("probability")
+        if (min(Y) >= 0 && max(Y) <= 1) return("probability")
         else return("numeric")
       }
     })
