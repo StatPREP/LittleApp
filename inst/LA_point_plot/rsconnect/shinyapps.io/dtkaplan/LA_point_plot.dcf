@@ -1,0 +1,12 @@
+name: LA_point_plot
+title: LA_point_plot
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 837275
+bundleId: 1985129
+url: https://dtkaplan.shinyapps.io/LA_point_plot/
+when: 1554329856.33832
+asMultiple: FALSE
+asStatic: FALSE
