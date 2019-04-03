@@ -10,6 +10,7 @@ library(littleapp2)
 library(markdown)
 library(mosaic)
 library(ggformula)
+library(DT)
 
 # App-specific controls
 jitter_controls <-
@@ -104,7 +105,10 @@ SERVER <- function(input, output, session) {
       HTML(includeHTML("explain.html"))
     })
     output$statistics <- renderText({
-      HTML(includeHTML("statistics.html"))
+      HTML(paste("<pre>",
+                 paste(capture.output(head(get_sample(), 30)), collapse = "\n"),
+                 "</pre>")
+      )
     })
 
     observe({ # Make vertical jittering on a reasonable scale for numeric variables
