@@ -12,6 +12,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Imports: 
     rlang,
+    tibble,
     shiny, 
     shinydashboard,
     shinyjs,
@@ -27,5 +28,6 @@ Imports:
     natality2014
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    yaml
 VignetteBuilder: knitr

@@ -4,7 +4,8 @@
 \alias{LA_dot_layer}
 \title{Plots and plot helpers}
 \usage{
-LA_dot_layer(formula, data, color, width, height, alpha, seed = 101)
+LA_dot_layer(formula, data, color, width, height, alpha = 1,
+  seed = 101)
 }
 \description{
 Plots and plot helpers

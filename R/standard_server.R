@@ -24,11 +24,14 @@ LA_standard_reactives <-
     })
     # The whole range, not just the range of the sample
     get_y_range <<- reactive({
-      range(the_data$frame[[input$var_y]], na.rm = TRUE)
+      if (get_response_type() == "numeric")
+        range(the_data$frame[[input$var_y]], na.rm = TRUE)
+      else length(unique(the_data$frame[[input$var_y]]))
     })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       req(the_data$frame)
+      req(input$facet_by)
       req(input$var_y != 1) # make sure it's initialized to a variable
       req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
       req(no_explanatory_var() || input$var_x %in% names(the_data$frame))
@@ -38,7 +41,7 @@ LA_standard_reactives <-
       get_a_sample(input_sample_size(),
                    input_stratify(),
                    input$var_x,
-                   c(input$var_y, input$var_x, input_covar()),
+                   c(input$var_y, input$var_x, input_covar(), input$facet_by),
                    the_data$frame,
                    get_sample_seed())
     })
@@ -69,6 +72,26 @@ LA_standard_reactives <-
         if (min(Y) >= 0 && max(Y) <= 1) return("probability")
         else return("numeric")
       }
+    })
+    get_covar_discrete <<- reactive({
+      # This will always be discrete
+      values <- if (! "covar" %in% names(input)) 1
+      else get_sample()[[input$covar]]
+      if (length(values) > 1 && is.numeric(values))
+        values  <- mosaic::ntiles(values, n = 3, format = "interval", digits = 2 )
+
+      values
+
+    })
+    get_facet_var <<- reactive({
+      # this will always be discrete
+      values <- if (! "facet_by" %in% names(input)) 1
+                else get_sample()[[input$facet_by]]
+      if (length(values) > 1 && is.numeric(values))
+        values  <- mosaic::ntiles(values, n = 3, format = "interval", digits = 2 )
+
+      values
+
     })
 
     # Inf if numeric and more than 10, the actual number of levels otherwise
@@ -198,7 +221,7 @@ LA_standard_reactives <-
 #' @export
 LA_standard_observers <-
   function(input, output, session, the_data, app_state,
-           select_x = function(x) x$vname, select_y = select_x, select_z = select_y){
+           select_x = function(x) x$vname, select_y = select_x, select_z = select_y, select_facet = NULL){
     observe({
       tmp <- unlist(strsplit(input$frame, ":", fixed = TRUE))
       Tmp <- LA_read_data(data_name = tmp[1], package = tmp[2])
@@ -231,13 +254,18 @@ LA_standard_observers <-
     observe({
       output$debug_table <- renderTable(the_data$types)
       vnames_y <- select_y(the_data$types)
-      vnames_x <- select_x(the_data$types)
+      vnames_x <- vnames_facet <- select_x(the_data$types)
       vnames_z <- select_z(the_data$types)
       updateSelectInput(session, "var_y", choices =  vnames_y)
       updateSelectInput(session, "var_x", choices =  vnames_x,
                         selected = vnames_x[pmin(2, length(vnames_x))])
       updateSelectInput(session, "covar", choices =  vnames_z)
-                          #vnames_z[!vnames_z %in% c(vnames_x, vnames_y)])
+      if (! is.null(select_facet)) {
+        vnames_facet <- select_facet(the_data$types)
+        updateSelectInput(session, "facet_by", choices = vnames_facet)
+      }
+
+
       the_data$initialized <<- TRUE
           })
 
@@ -269,6 +297,12 @@ LA_standard_observers <-
     observe({
       if (no_explanatory_var() || "numeric" == get_explanatory_type()) shinyjs::hide("stratify")
       else shinyjs::show("stratify")
+    })
+
+    observe({
+      if ("facet_by" %in% names(input))
+        updateSelectInput
+
     })
 
     observeEvent(input$new_trial, {

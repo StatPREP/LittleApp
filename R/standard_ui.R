@@ -4,7 +4,7 @@
 #' @param collapsed Logical indicating whether to display box as collapsed initially
 #'
 #' @export
-LA_data_source <- function(width = 12, collapsed = FALSE, covariate = TRUE) {
+LA_data_source <- function(width = 12, collapsed = FALSE, covariate = TRUE, facet = FALSE) {
   box(title = "Data source", width = width, status = "primary", solidHeader = FALSE,
       collapsible = TRUE, collapsed = collapsed,
       background = "black",
@@ -18,8 +18,8 @@ LA_data_source <- function(width = 12, collapsed = FALSE, covariate = TRUE) {
       # 1 stands for "no variable selected"
       tighten(selectizeInput("var_y", "Response", choices = list("1"))),
       tighten(selectizeInput("var_x", "Explanatory", choices = list("1"))),
-      if (covariate) tighten(selectizeInput("covar", "Covariate", choices = list("1")))
-      else NULL
+      if (covariate) tighten(selectizeInput("covar", "Covariate", choices = list("1"))) else NULL,
+      if (facet) tighten(selectizeInput("facet_by", "Facet by:", choices = list("1"))) else NULL
       )
 }
 

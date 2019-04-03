@@ -1,7 +1,7 @@
 #' Plots and plot helpers
 #'
 #' @export
-LA_dot_layer <- function(formula, data, color, width, height, alpha, seed = 101) {
+LA_dot_layer <- function(formula, data, color, width, height, alpha = 1, seed = 101) {
   P <- gf_jitter(formula,
                  data = data,
                  color = color,
