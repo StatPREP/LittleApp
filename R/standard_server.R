@@ -26,12 +26,11 @@ LA_standard_reactives <-
     get_y_range <<- reactive({
       if (get_response_type() == "numeric")
         range(the_data$frame[[input$var_y]], na.rm = TRUE)
-      else length(unique(the_data$frame[[input$var_y]]))
+      else c(1, length(unique(the_data$frame[[input$var_y]])))
     })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       req(the_data$frame)
-      req(input$facet_by)
       req(input$var_y != 1) # make sure it's initialized to a variable
       req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
       req(no_explanatory_var() || input$var_x %in% names(the_data$frame))

@@ -83,10 +83,11 @@ SERVER <- function(input, output, session) {
                         width = jitter_w,
                         height = jitter_h,
                         alpha = LA_point_alpha(input_sample_size()),
-                        seed = 101
-      )  %>%
-        gf_lims(y = get_y_range())  # to keep scale constant across samples
+                        seed = 101)
 
+      if (get_response_type() == "numeric") { # can't set scale for categorical variable
+        P <- P %>% gf_lims(y = get_y_range())  # to keep scale constant across samples
+      }
       # Add faceting as appropriate
       if ("facet_by" %in% names(input) && input$facet_by != "1") {
         P <- P %>% gf_facet_grid(as.formula(glue::glue("~ {input$facet_by}")))

@@ -80,8 +80,6 @@ SERVER <- function(input, output, session) {
       the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
       plot_data  <- get_sample()
       if (input$var_y %in% names(plot_data)  && input$var_y %in% names(plot_data))  {
-        # The next line gets all the accumulated randomization trials.
-        Trials <- get_all_trials()
         P <-
           get_sample()  %>%
           gf_jitter( the_formula, seed = 101,
