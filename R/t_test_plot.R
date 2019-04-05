@@ -53,7 +53,9 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
     res$right_of_midpoint <- 2.05
     res$p_label <- nice_p(tmp$p.value, 3)
 
-    T_stats <- as.data.frame(res)
+    T_stats <- as.data.frame(res) %>%
+      mutate(low = pmax(low, y_range[1]),
+             high = pmin(high, y_range[2]))
     P <- P %>%
       gf_errorbar(low + high ~ midpoint, data = T_stats,
                   width = 1, show.legend = FALSE) %>%

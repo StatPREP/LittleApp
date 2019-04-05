@@ -71,10 +71,12 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
                       labels = labels)
      # count how many in each percent
      In_groups <- tibble(y = This_data) %>%
-       mutate(label = cut(y, breaks = c(-Inf, breaks, Inf), labels = labels)) %>%
+       mutate(label = as.character(
+         cut(y, breaks = c(-Inf, breaks, Inf), labels = labels))) %>%
        group_by(label)  %>%
        summarise(percent = 100 * n() / nrow(.)) %>%
-       mutate(level = xvalue)
+       mutate(level = xvalue) %>%
+       na.omit()
      # figure out where to place the annotations
      dpos <- diff(breaks)
      dpos <- c(breaks[1] - dpos[1],
@@ -84,20 +86,21 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
      Foo <- tibble(x = label_positions, y = mean(Tmp$y) / 2,
                                short = short_labels, label = labels)
      Foo <- Foo %>% left_join(In_groups) %>%
-       mutate(percent = round(percent, 1))
+       mutate(percent = round(percent, 1)) %>% na.omit()
      if (show_percent) Foo$short <- paste0(Foo$short, ": ", sprintf("%3.1f", Foo$percent), "%")
 
-     Theory <- tibble(x = y_grid_values, y = dnorm(x, mean = this_mean, sd = this_sd), level = xvalue)
+     Theory <- tibble(x = y_grid_values, y = dnorm(x, mean = this_mean, sd = this_sd), level = xvalue) %>%
+       na.omit()
      These_stripes <- tibble(x = this_mean + this_sd * (-3):3,
                             y = dnorm(x,  mean = this_mean, sd = this_sd),
-                            level = xvalue)
+                            level = xvalue) %>% na.omit()
      For_scale <- tibble(scale = dnorm(0, sd=this_sd), level = xvalue)
      # Accumulate across values of xvar
-     Densities <- bind_rows(Densities, Tmp)
-     Labels <- bind_rows(Labels, Foo)
-     Normal <- bind_rows(Normal, Theory)
-     Stripes <- bind_rows(Stripes, These_stripes)
-     Density_scale <- bind_rows(Density_scale, For_scale)
+     Densities <- bind_rows(Densities, Tmp) %>% na.omit()
+     Labels <- bind_rows(Labels, Foo) %>% na.omit()
+     Normal <- bind_rows(Normal, Theory) %>% na.omit()
+     Stripes <- bind_rows(Stripes, These_stripes) %>% na.omit()
+     Density_scale <- bind_rows(Density_scale, For_scale) %>% na.omit()
   }
 
   if (violin) {
@@ -108,7 +111,8 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
       # scale the densities so that the maximimum is <vwidth>
       left_join(Density_scale) %>%
       mutate(y = vwidth * y / max(scale)) %>%
-      mutate(left = xpos - y, right = xpos + y)
+      mutate(left = xpos - y, right = xpos + y) %>%
+      na.omit()
       # group_by(level) %>%
       # mutate(y =  y / (mean(y)*diff(range(x)))) %>%
       # ungroup() %>%
@@ -124,14 +128,16 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
         mutate(xpos = as.numeric(as.factor(level))) %>%
         left_join(Density_scale) %>%
         mutate(y  =  vwidth * y / max(scale)) %>%
-        mutate(left = xpos - y, right = xpos + y)
+        mutate(left = xpos - y, right = xpos + y) %>%
+        na.omit()
       P <- P %>%
         gf_segment(x + x ~ left + right, data = Normal, alpha = 0.45, color = "white")
       Stripes <- Stripes %>%
         mutate(xpos = as.numeric(as.factor(level))) %>%
         left_join(Density_scale) %>%
         mutate(y  =  vwidth * y / max(scale)) %>%
-        mutate(left = xpos - y, right = xpos + y)
+        mutate(left = xpos - y, right = xpos + y) %>%
+        na.omit()
       P <- P %>%
         gf_segment(x + x ~ left + right, data = Stripes, color = "white", alpha = 0.75)
     }
@@ -167,7 +173,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
 
 
     if (length(unique(xvar)) > 1)
-      P <- P %>% gf_facet_grid(level ~ .)
+      P <- P %>% gf_facet_grid(level ~ ., drop = TRUE)
   }
 
   P  %>%

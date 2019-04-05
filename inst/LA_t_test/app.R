@@ -15,9 +15,9 @@ my_special_controls <-
       collapsible = FALSE, collapsed = FALSE,
       sliderInput("null_mu", "Null hypothesis 'mu'", min = 0, max = 1, value = 0.5) %>%
         tighten(bottom = -10),
-      checkboxInput("show_mean", "Show mean?", value = TRUE) %>%
+      checkboxInput("show_mean", "Show mean", value = FALSE) %>%
         tighten(bottom = -10),
-      checkboxInput("show_ci", "Show conf. interval?", value = TRUE) %>%
+      checkboxInput("show_ci", "Show conf. interval", value = FALSE) %>%
         tighten(bottom = -10),
       selectInput("interval_level", "Confidence level",
                   choices = list("99%" = 0.99, "95%" = 0.95, "92%" = 0.92,
@@ -25,12 +25,12 @@ my_special_controls <-
                                  "67%" = 0.67, "50%" = 0.50),
                   selected = 0.95) %>%
         tighten(bottom = -10),
-      checkboxInput("show_t", "Show t interval?", value = FALSE) %>%
+      checkboxInput("show_t", "Show t interval", value = FALSE) %>%
         tighten(bottom = -10),
-      checkboxInput("var_equal", "Equal variance?", value =  TRUE) %>%
+      checkboxInput("var_equal", "Equal variance", value =  TRUE) %>%
         tighten(bottom = -10),
       hr(),
-      checkboxInput("shuffle", "Shuffle groups?", value = FALSE)
+      checkboxInput("shuffle", "Shuffle groups", value = FALSE)
   )
 
 # Boilerplate for the UI
@@ -127,7 +127,8 @@ SERVER <- function(input, output, session) {
   })
 
   output$main_plot <- renderPlot({
-    if (no_explanatory_var()) {
+    P <-
+      if (no_explanatory_var()) {
       one_sample_t_plot(get_frame_formula(), get_app_data(),
                         level = as.numeric(input$interval_level),
                         show_mean = input$show_mean,
@@ -147,6 +148,11 @@ SERVER <- function(input, output, session) {
                         ruler = input$yruler) %>%
         gf_labs(title = "Two-sample t-test")
     }
+    if (get_response_type() == "numeric") { # can't set scale for categorical variable
+      P <- P %>% gf_lims(y = get_y_range())  # to keep scale constant across samples
+    }
+
+    P
   })
   # Other built-in output widgets besides output$main_plot
   # output$codebook <- renderText({ Your HTML })

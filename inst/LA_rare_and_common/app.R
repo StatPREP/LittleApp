@@ -96,6 +96,7 @@ SERVER <- function(input, output, session) {
   })
   output$main_plot <- renderPlot({
     req(input$common,  input$rare_left, input$rare_right)
+    if (input$rare_right == input$rare_left) return() # not yet initialized
     plot_density_y(yvar=get_response_var(),
                    xvar = get_explanatory_var(),
                    violin = input$show_violin,

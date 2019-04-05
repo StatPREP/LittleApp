@@ -14,14 +14,14 @@
 #' `the_data` so that the individual elements can be referred to by "frame", "types", etc.
 #'
 
-library(NHANES)
+data(NHANES, package = "NHANES")
 library(littleapp2)
 
 SDSdata::sds_setup()
 
 frame <-
     NHANES %>%
-    select(
+    dplyr::select(
       sex = "Gender",
       age = "Age",
       months = "AgeMonths",
@@ -73,11 +73,14 @@ frame <-
       age_sex = "SexAge",
       orientation_sex = "SexOrientation") %>%
     mutate(age = ifelse(is.na(months), age, months/12)) %>%
-    select(- months)
+    dplyr::select(- months)
 # create some binary variables
 frame$home_type <- ifelse(frame$home_own == "Other", NA, as.character(frame$home_own))
 frame$days_with_no_interest <- ifelse(frame$little_interest  == "None", "No", "Yes")
 frame$ever_married <- ifelse(frame$marital %in% c("LivePartner", "NeverMarried"), "No",  "Yes")
+frame$height_adults <- ifelse(frame$age >= 18, frame$height, NA)
+frame$weight_adults <- ifelse(frame$age >= 18, frame$weight, NA)
+frame$BMI_adults <- ifelse(frame$age >= 18, frame$bmi, NA)
 codebook <- list(
   sex = "Sex of study participant	coded as male or female",
   age = "Age in years at screening of study participant. Note: Subjects 80 years or older were recorded as 80.",
@@ -134,4 +137,6 @@ codebook <- list(
   )
 overall <- "This is survey data collected by the US National Center for Health Statistics (NCHS) which has conducted a series of health and nutrition surveys since the early 1960's. These data are for 2011 and 2012. (See NHANES package.)"
 types <- LA_var_types(frame)
-save(frame, types, codebook, overall, file = "data/Health.rda")
+NHANES2 <- frame
+#save(frame, types, codebook, overall, file = "data/Health.rda")
+save(NHANES2, file = "data/NHANES2.rda")
