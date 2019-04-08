@@ -17,6 +17,7 @@ point_plot_controls <-
       status = "primary", solidHeader = TRUE,
       collapsible = FALSE, collapsed = FALSE,
       checkboxInput("jitter",  "Jitter categorical variables.") %>% tighten(bottom = -10),
+      noUiSliderInput("alpha", "Transparency:", min = 0.01, max = 1, value = 0.9),
       hr(),
       checkboxInput("show_violin", "Show density  violin") %>% tighten(bottom = -10)
   )
@@ -82,7 +83,7 @@ SERVER <- function(input, output, session) {
                         color = get_color_formula(),
                         width = jitter_w,
                         height = jitter_h,
-                        alpha = LA_point_alpha(input_sample_size()),
+                        alpha = input$alpha, #LA_point_alpha(input_sample_size()),
                         seed = 101)
 
       if (get_response_type() == "numeric") { # can't set scale for categorical variable
