@@ -1,0 +1,12 @@
+name: LA_proportions
+title: LA_proportions
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 848617
+bundleId: 1996235
+url: https://dtkaplan.shinyapps.io/LA_proportions/
+when: 1554764625.28993
+asMultiple: FALSE
+asStatic: FALSE
