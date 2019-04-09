@@ -25,8 +25,8 @@ simple_regression_report <- function(model_formula, data) {
 <h3>Statistics on the model</h3>
 <ul>
 <li>little-r is {little_r}</li>
-<li>R<sup>2</sup> = {round(Stats$r.squared, 3)}</li>
-<li>Adjusted R<sup>2</sup> =  {round(Stats$adj.r.squared, 3)}
+<li>R<sup>2</sup> = {round(Stats$r.squared, 3)} so R = {round(sqrt(Stats$r.squared), 3)}</li>
+<li>Adjusted R<sup>2</sup> =  {round(Stats$adj.r.squared, 2)}</li>
 <li>residual standard error = {signif(Stats$sigma, 3)}</li>
 <li>F-statistic:  F = {round(Stats$statistic,1)} with {Stats$df} over {Stats$df.residual} degrees of freedom.</li>
 <li>p-value from F-statistic:  {round(Stats$p.value, 4)}</li>
