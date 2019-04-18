@@ -55,7 +55,7 @@ UI <- function(request) { #it's a function  for bookmarking
       titleWidth = "90%"
     ),
     dashboardSidebar(
-      width = 350
+      width = 350, p("")
       , LA_data_source(6)
       , LA_sample_ui(6)
       , bootstrap_controls

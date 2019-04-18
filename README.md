@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # LittleApp: A package for building statistics demonstrations
 
 Little Apps are interactive statistics demonstrations. They are intended to have a highly consistent interface and to be fundamentally oriented around  displays of data, typically point plots. Statistics and models are displayed, as required, as annotations layered on the point plot.
@@ -10,19 +9,16 @@ At the core of a generic Little App is a point-plot frame defined by a *response
 Below the  core plot is a set of tabs. Typically, these include:
 
 - *Explain*: An explanation of how to use the Little App
-=======
-# LittleApp
+- *Codebook*: Documentation for the data frame currently displayed in the graphic.
+- *Statistics*: A tabular or text presentation relevant to the statistics being demonstrated, e.g. a regression table or a t-test report.
+- *R commands*: A brief introduction to the R commands underlying the graphics and/or statistics displayed by the app.
 
-This repository contains a proposed re-factoring of the Little Apps, based on feedback from year 2 of the StatPREP project. 
+A control bar lies to the left of the core plot and the tabs. The controls are divided into  several blocks, some of which are specific to the topic of the individual app. There are two control blocks that are found in (almost?) every app:
 
-* Uses shiny dashboard for a more consistent UI and more compact controls.
-* Extends the range of datasets that can be used.
-* Modifies the resampling/randomizaton paradigm so that:
-    - the sample is always genuine data.
-    - the randomization trials are stored in one array that can be accessed directly for graphing or statistical calculations.
-    
-Rather than using a new branch in the original LittleApp repository, this is an entirely new repository. That makes it easier to look at the original for adopting bits from it to this new re-factoring.
-    
-    
-Claus Wilke, HOPS, graphics from his https://github.com/wilkelab/ungeviz
->>>>>>> fdc9b828a451d87c064be8345ed0780f8b4b5af1
+1. *Data source* with  which the user selects a data frame and assigns variables to the various roles (e.g. response, explanatory, covariate) in the app.
+2. *Sample* which allows the user to set the sample size $n$ and to refresh the graphics and statistics displays with a new sample. In some apps, typically when the explanatory variable is categorical, there is an option to stratify the sampling. Doing so will result in $n$ points at each categorical level. (When the data aren't sufficient to provide this for each  level, resampling is done.) 
+
+
+----------
+
+Some of the bootstrapping displays make use of Claus Wilke's `ungeviz` package available at <https://github.com/wilkelab/ungeviz>. 
