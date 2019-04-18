@@ -40,8 +40,8 @@ UI <- function(request) { #it's a function  for bookmarking
       title = "Center and spread",
       titleWidth = "90%"
     ),
-    dashboardSidebar(width = 350
-      , LA_data_source(6)
+    dashboardSidebar(width = 350, p("")
+      , LA_data_source(6, covariate = FALSE)
       , choose_stats
       , LA_sample_ui(6)
       #, LA_inference(6),

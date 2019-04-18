@@ -18,6 +18,8 @@ A control bar lies to the left of the core plot and the tabs. The controls are d
 1. *Data source* with  which the user selects a data frame and assigns variables to the various roles (e.g. response, explanatory, covariate) in the app.
 2. *Sample* which allows the user to set the sample size $n$ and to refresh the graphics and statistics displays with a new sample. In some apps, typically when the explanatory variable is categorical, there is an option to stratify the sampling. Doing so will result in $n$ points at each categorical level. (When the data aren't sufficient to provide this for each  level, resampling is done.) 
 
+In the `inst` directory, there is a template directory containing a simple Little App that can serve as a simple starting point for writing a new app.
+
 
 ----------
 

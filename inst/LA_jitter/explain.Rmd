@@ -4,18 +4,28 @@ knitr::opts_chunk$set(echo = TRUE)
 SDSdata::sds_setup()
 ```
 
-## Using the App
+## Point plots, jittering, and transparency
 
-The point of this app is ...
+Point plots are very simple. There is an explanatory variable and a response variable. Each row in  the data frame generates one dot in the plot. The x-position of the dot corresponds to the value of the explanatory variable; the y-position corresponds to the value of the response variable.
 
-```{r}
-NHANES %>% 
-  gf_point(Weight ~ Age, data = .)
-```
+Whenever one or both of the variables is quantitative, each level of the quantitative variable is represented by a single point on the axis. This means  that the dots will all line up. It also means that most of the plotting  frame is empty; there's lots of empty space between  the axis tick marks for the various categorical levels. 
 
-```{r}
-NHANES %>% 
-  gf_point(Weight ~ Age, data = ., color = ~ Gender, alpha = 0.3)
-```
+Typically, there will be multiple dots plotted one over the other. But all you can see is the single dot, since they are right on  top of one another. 
+
+*Jittering* and *transparency* are two tricks for revealing how many dots there are. In jittering, one takes advantage of the empty space between categorical levels to spread things out a little. This is done at random to  avoid the illusion of detail that isn't really there. 
+
+What's the right amount of spreading out? Since jittering is a technique to help human perception, the answer depends on the human trying to make sense of the graphic. This app let's you vary the amount of horizontal and of vertical jittering. A good choice of the amount will make keep  the various categorical levels visually distinct, while not crowding the dots so tightly that you can't tell how many there are. 
+
+Transparency is  another technique for revealing how many dots are placed at a given point. Each of the dots is made somewhat transparent. When there are two dots at the same point, the result will be darker than when there is a single dot. By making the transparency almost complete, you can get a good  idea of the number of dots even when there are very many of them at one point. Again, what's the right level? This depends on the human viewing the graph.
+
+In this app, you can play around with the amount of jittering. As you'll see, you can jitter the display of the response  variable and you can also jitter the display of the explanatory variable. 
+
+If you want to think of density concretely, pour a little salt on  a table. The grains will spread out. At some points on the table there is no salt: the density is zero. At other points, there is a bit of salt: medium density. And there might be points on the table where  there is so much salt that the salt grains touch one another: high density.
+
+The human visual system is  very sensitive to changes in density at adjacent locations. But we  are not very good at comparing densities across large distances. It can be done, but  it  requires some cognitive effort.
+
+But there are other ways to display density not as the crowding together of points but as a height or width of a curve. This app lets you overlay one such display: the violin plot. At values of the response variable where there is a high density of points, the violin plot  will be  wide. At response values where there is a low density of points, the violin will be narrow.
+
+For whatever reasons, our visual system is more  sensitive to  changes in length or width than to changes in  crowding together. So, at a glance one can  see in the violin plot what would take careful examination if looking  at the crowding  of points. 
 
 
