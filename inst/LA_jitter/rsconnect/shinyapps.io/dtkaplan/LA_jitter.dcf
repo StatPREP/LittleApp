@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 772702
-bundleId: 2022128
+bundleId: 2022214
 url: https://dtkaplan.shinyapps.io/LA_jitter/
-when: 1555619578.98394
+when: 1555622708.76286
 asMultiple: FALSE
 asStatic: FALSE

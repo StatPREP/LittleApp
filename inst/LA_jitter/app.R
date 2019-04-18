@@ -1,6 +1,5 @@
 #
-# A template for a Little App
-# this one is about jittering
+#  jittering
 #
 
 library(shiny)
