@@ -1,0 +1,8 @@
+### Little App: Two-sample t test
+
+Put in the computer commands here.
+
+t.test
+
+shuffle
+

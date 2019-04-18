@@ -1,0 +1,81 @@
+### Little App: Regression
+
+"Regression" is a very old name for modeling when the response variable is quantitative. This app takes care of the regression calculations and displays the results graphically. To keep the graphics simple, the app uses a single quantitative explanatory variable and, optionally, another explanatory variable that is categorical.
+
+```{r include = FALSE}
+SDSdata::sds_setup()
+library(LittleApp)
+```
+
+To illustrate the app at work, we'll work with one of the very first data sets used to measure genetic heritability, Francis Galton's 1880s measurements of the height of adult children and their parents. Specifically, we'll take the response variable to be the `height` of an adult  and the quantitative explanatory variable to be the person's mother's height. (Maybe you think that tall mothers tend to have tall children? Let's find out!)
+
+The main display of the app is a  point plot showing the response vs explanatory variable for each  point in the sample. We'll work with a sample size of 50, but you could use whatever you want.
+
+The display will look like this (although your sample will be different):
+
+```{r echo = FALSE}
+set.seed(104)
+Samp <-  Galton %>% sample_n(size = 50) %>% 
+  mutate(height = height + .25* runif(nrow(.)),
+         mother = mother + .25* runif(nrow(.)))
+smoother_plot(height ~ mother, height ~ mother, Samp, color = "black",  trace_vert = FALSE,
+              trace_horiz = FALSE, show_mod_vals = FALSE)
+```
+
+The fitted regression model is shown by the black sloping line.  For this sample, the regression line slopes upward, suggesting that tall mothers tend to pass their tallness to their children. Before we reach that conclusion, let's look at the impact of sampling variation. You can generate new samples with the  "New Sample" button, looking to see if the regression line is consistent from one sample to another or if it sometimes slopes up and sometimes slopes down. If the latter, it might be that there is no relationship between the response and explanatory variable, or it might be that we don't have a large enough sample size to see the relationship reliably. You can
+try different sample sizes to figure out which one applies here.
+
+The "Statistics" tab shows a convention tabular report for regression models, called a "regression table". The regression table reports the slope of the regression line; that's the "coefficient" on the second line of the table. It also includes information (the "standard error") to let youfind the confidence interval on the regression slope as well as a p-value to help you decide whether the null hypothesis of no relationship is a plausible explanation of the observed relationship between the response and the explanatory variable.
+
+The regression model is a function that takes values for the explanatory variable(s) as input and produces a value for the response variable. Each point in the plot will have one model value. You can see the model value for each point by checking the "Show model values" checkbox. It might be easier to connect the point with it's model value by also checking "Trace vertically."
+
+```{r echo = FALSE}
+smoother_plot(height ~ mother, height ~ mother, Samp, color = "blue",  trace_vert = TRUE,
+              trace_horiz = FALSE, show_mod_vals = TRUE)
+```
+
+You can also choose a second explanatory variable. In general, regression can make use of any number of explanatory variables of any type, but in the app you are limited to two explanatory variables, the second of which (which we're calling the "covariate") must be categorical. The only reason  for this is to  make the graph easier to interpret. To illustrate, let's set `sex` to be the covariate. The main display will look like this:
+
+```{r echo = FALSE}
+smoother_plot(height ~ mother, height ~ mother * sex, Samp, color = ~ sex,  trace_vert = FALSE,
+              trace_horiz = FALSE, show_mod_vals = FALSE)
+```
+
+When a covariate is specified, there will be a separate regression line for each level of the covariate. So, here, there's a line for female children and another line for male children.
+
+##  The bars on  the right
+
+The graphic display is mostly a point plot, but there are some horizontal bars displayed on the right side of the plot that wouldn't be in an ordinary point plot. Those bars have been added to help you visualize *how much* of the variation in the response variable is being explained by the explanatory variable(s).
+
+First, on the far right are some red horizontal bars. There is one bar for each point in the sample. The vertical  position of each  bar is the same as that bar's corresponding point. One way to confirm this to  yourself is to compare the bars and points for the most extreme values of the response variable. For instance, the two top values of height are about 73 and 74 inches, the same level as the two top red bars.
+
+The other set of bars is much the same thing, but instead of showing the values for the actual response variable, those bars show the *model output* for each point. (The color of the bars reflects the levels  of the covariate, if any.) Since it  can be difficult to look back and forth between the points and the bars, there is a checkbox to turn on horizontal tracing which makes it clear which model value point corresponds to  which  bar, like this:
+
+```{r echo = FALSE}
+smoother_plot(height ~ mother, height ~ mother * sex, Samp, color = ~ sex,  trace_vert = FALSE,
+              trace_horiz = TRUE, show_mod_vals = TRUE)
+```
+
+Layered on top of the horizontal bars are two I-shaped vertical intervals. The black interval shows the standard deviation of the response variable. The blue interval shows the standard deviation of the model values. The  ratio of the length of the blue to the black bar tells how much of the variation  in the response variable is explained by the model.
+
+For a model *without* any covariate,  just a single quantitative  explanatory  variable, the ratio  of blue to black lengths  gives the *correlation coefficient* $r$. When there is a covariate, $r$ no longer makes sense. Instead, the quantity $R^2$ is used to  describe the fraction of the variance of the response variable that is explained by the model. In the plot above, the  ratio of blue to black is about 0.8, so $R^2 = 0.8^2 = 0.64$.
+
+It's better to get used to thinking in terms of $R^2$ for several reasons:
+
+- It applies in a wider variety of settings than $r$, including when there are multiple explanatory variables.
+- It's what's used in professional work, for example in the regression  report shown in the *Statistics* tab.
+
+Why $R^2$ and not $R$-without-the-square? The reason has to do with how to  add up contributions from  multiple explanatory variables, which works in  much the same way as the Pythagorean Theorem does in adding up the square of the lengths of the legs of a right triangle.
+
+Things to explore.
+
+- Find response/explanatory pairs that produce a large $R^2$ and some that produce $R^2$ near zero.
+- Use the "New Sample" button to explore how big the sample has to be in order for the slope of the line to be consistent from one sample to another. Hint: the smallest sample size that produces a consistent slope depends on $R^2$. How?
+- Can you find a model that produces a blue confidence  interval larger than the black confidence interval? (Hint: Be willing to give up!)
+- Can you find a case where the most extreme model value is higher than the highest value of the response variable? (Hint: Uncommon, but it does happen.) 
+
+## Nonlinear models
+
+A straight-line model is not alway's appropriate. Sometimes  a better model is one that changes slope or that even goes up and down. You can explore  such models  by setting the "model order" to a value  greater  than  one.
+
+

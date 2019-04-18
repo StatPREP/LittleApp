@@ -2,9 +2,11 @@
 #'
 #' @export
 LA_available_data <- function() {
-  list(Health = "Health:littleapp2",
+  list(NHANES = "NHANES2:LittleApp",
        Galton = "Galton:mosaicData",
-       mtcars = "mtcars:datasets",
-       CPS = "CPS85:mosaicData"
+       Births_2014 = "Births_2014:SDSdata",
+       CPS85 = "CPS85:mosaicData",
+       diamonds = "diamonds:ggplot2",
+       SAT_test = "SATx:SDSdata"
        )
 }
