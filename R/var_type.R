@@ -10,14 +10,17 @@
 #' @export
 LA_var_types <- function(.data) {
   f <- function(x) {
-    data.frame(numeric = is.numeric(x),
-               class = class(x),
-               n_levels = length(unique(x)),
-               stringsAsFactors = FALSE)
+    tibble(numeric = is.numeric(x),
+               class = class(x)[1],
+               n_levels = length(unique(na.omit(x))),
+               stringsAsFactors = FALSE) %>%
+      mutate(spread = ifelse(numeric, sd(x, na.rm = TRUE),  0))
   }
   Tmp <- lapply(.data, f)
 
-  bind_cols(vname = names(Tmp), bind_rows(Tmp))
+  res <- bind_cols(vname = names(Tmp), bind_rows(Tmp))
+
+  res
 }
 
 

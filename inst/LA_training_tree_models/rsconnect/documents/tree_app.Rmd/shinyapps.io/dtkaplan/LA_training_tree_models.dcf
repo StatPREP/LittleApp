@@ -1,0 +1,12 @@
+name: LA_training_tree_models
+title: LA_training_tree_models
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 809318
+bundleId: 1960626
+url: https://dtkaplan.shinyapps.io/LA_training_tree_models/
+when: 1553375939.77779
+asMultiple: FALSE
+asStatic: FALSE

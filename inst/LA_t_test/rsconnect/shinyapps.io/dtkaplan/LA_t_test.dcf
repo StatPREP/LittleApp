@@ -1,0 +1,12 @@
+name: LA_t_test
+title: LA_t_test
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 689780
+bundleId: 1926735
+url: https://dtkaplan.shinyapps.io/LA_t_test/
+when: 1552094025.07192
+asMultiple: FALSE
+asStatic: FALSE

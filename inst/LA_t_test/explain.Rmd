@@ -1,0 +1,115 @@
+### Little App: t-test
+
+```{r include=FALSE}
+library(LittleApp)
+library(mosaic)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+#### Samples and populations
+
+We often summarize a variable with its mean value. And, since we work with *samples* from a *population*, the mean we calculate is a "sample mean." The sample mean is an example of a "sample statistic", that is, a numerical summary of the sample.  
+
+Usually our main interest is not so much in the sample, but in the population whence the sample was drawn. The mean value from the population, if we had data on the whole population, would be called a "population parameter." The vocabulary here is ...
+
+1. "statistic" always refers to a number calculated from a sample.
+2. "parameter" is the corresponding number calculated from the  population. Since we rarely have the entire population at hand, we are almost always using a sample to calculate statistics
+
+*Statistical inference* refers to a process of using sample statistics -- such as the sample mean -- to guide reasonable conclusions about the corresponding pouplation parameter. That is, statistical inference is about the relationship between  the known sample statistic -- we know it because we have the sample and can do calculations on it -- and the unknown population *parameter*.
+
+A *one-sample* t-test refers to a situation where we have the sample mean of a single group. In such a situation, the t-test lets us calculate a *confidence interval* on the sample mean or, in terms of hypothesis testing, shows us whether we should "reject" or "fail to reject" the null hypothesis that the population parameter  mean is zero or some other specific quantity. (In the one-sample explanation below, we'll compare the mean height of a sample of $n=20$ people to a hypothesized value of 65 inches.)
+
+A *two-sample* t-test is much the same thing, but we look at the *difference* in means between two groups.
+
+#### Confidence interval
+
+Show picture of the confidence interval on an individual mean.
+
+Show picture of the confidence interval on  the difference between two means.
+
+#### p value
+
+The app includes a diagram showing how the p-value is calculated from the sample statistic.
+
+The diagram looks like this:
+
+```{r define-function, echo = FALSE}
+draw_diagram <- function(the_formula = height ~ sex, data=Galton) {
+    if (rhs(the_formula) == 1 || length(the_formula) == 2) {
+      data <- eval(the_formula[[2]], envir = data)
+      Stats <- stats::t.test(data)
+      graph_title <- "Sample mean"
+      observed <- Stats$statistic
+      # get the observed mean on the scale of the observed t-statistic
+      conversion <- abs(Stats$estimate / observed)
+    } else {
+      Stats <- stats::t.test(the_formula, data = data,
+                           var.equal = TRUE)
+      graph_title <- "Difference in sample means"
+      observed <- Stats$statistic
+      conversion <- abs(diff(Stats$estimate) / observed)
+    }
+
+    df <- Stats$parameter
+
+    x_outer <- pmax(3, abs(observed))
+    text_formula <- as.formula(glue::glue("0.2 ~ {observed}"))
+    mosaic::cdist("t", 1-Stats$p.value, df = df,
+                  return = "plot", alpha = 0.5) %>%
+      gf_labs(x = "t-statistic", y = "Relative probability",
+              title = "Sampling distribution under Null Hypothesis") %>%
+      gf_vline(xintercept  = observed, color = "red") %>%
+      gf_lims(x = x_outer  * c(-1, 1)) %>%
+      gf_text(text_formula,  label = "Observed value",
+              data = NULL, angle = 90) %>%
+      gf_segment(0.2 + 0.2 ~ 0 + 1, color = "black", data  = NULL) %>%
+      gf_theme(
+        scale_x_continuous(
+          breaks = c((-ceiling(x_outer)):ceiling(x_outer)),
+          sec.axis = sec_axis(~ . * conversion, name = graph_title)))
+}
+```
+
+The figure below shows the diagram for a one-sample t-test comparing the mean `height` in Galton's data to a Null Hypothesis height of 65 inches. A sample of size $n = 20$ is being used. (You can't tell that from the diagram itself, but you can read it off the Little App controls when you are using the app itself.) It's a complicated diagram, so look at it carefully before reading the explanation below.
+
+```{r one-sample,  echo = FALSE}
+set.seed(101)
+draw_diagram(the_formula = ~ height - 65, data = Galton %>% sample_n(size  = 20))
+```
+
+* The x-axis scale on the top of the graphic frame. The observed value of the sample mean was slightly more than 2 inches. Or, rather, since we are comparing the sample mean to the Null Hypothesis height of 65 inches, the actual mean was slightly more than 67 inches.
+* There is also a scale at the top of the frame, labeled "t-statistic." When you perform a t-test,  you  do a calculation  of the t-statistic from  the sample mean, sample size, and standard deviation. The formula is 
+$$ t = \frac{\mbox{sample_mean - null_value}}{\mbox{sample_sd} / \sqrt{n}}$$
+So for any possible value of the sample mean, there is a corresponding value of t. The two horizontal axes show this correspondence. 
+* The graph as a whole is showing the relative probability of the various possible values of t *under the null hypothesis*. That is, if we *assume that the population mean*  is exactly the same as that specified for the null hypothesis, the consequence of that assumption is that some values for the sample statistic are more likely than others. The most likely (under the null hypothesis) occurs  at t  = 0.
+* The value we got for our actual sample statistic is shown as the vertical line marked "observed value."  In the diagram above, the observed t is about 2.6.
+* The question the p-value tries to address is whether the sample statistic we observed is a plausible result if the null hypothesis were true. If the null were true, we would expect almost all the observations to be within a range of t from about -2 to 2. Our observed value is 2.6, which indicates that it's a pretty unlikely outcome if the null hypothesis were true. The result is that we "reject the null hypothesis." 
+* If our observation were between about -2 and 2, it would be pretty consistent with what we'd expect if the null hypothesis were true. In that situation the conclusion would be that we "fail to reject the null hypothesis." Note that it's invalid to say that we "accept" the null hypothesis. Strange though it may seem, the logic of hypothesis testing is that either we "reject" or "fail to reject" the null.
+* The p-value answers a question that's closely related  to whether the observation is between -2 and 2. The p-value gives a *probability* that, if the null hypothesis were true, we would see a result as or more extreme as our actual observation. That probability is the area in the *tails* of the distribution. In the diagram, the value is $p = 0.017$.  The tails are those parts of the distribution that are at least as far away from zero as was our observation.
+* The point of the p-value is to provide a concise notation for how implausible our actual observation would be if the null hypothesis were true. The smaller the p-value, the more implausible the observed value under the null hypothesis. One common standard in statistics is that $p < 0.05$ leads us to "reject the null." 
+
+For a two-sample t-test, the diagram is much the same, but the observed quantity is the *difference* between the two group means. The diagram below compares the heights of females and males in the Galton data, here with a sample size with $n_1 = 3$ and $n_2 = 3$. The observed difference in means is about -5 inches, meaning that females are about 5 inches shorter than males. Here, the sample size is very small, and the p-value is relatively large: $p = 0.125$. The result would be to "fail to reject the null hypothesis." 
+
+```{r two-sample-3,  echo = FALSE}
+set.seed(108)
+draw_diagram(the_formula = height ~ sex, data = Galton %>% group_by(sex) %>% sample_n(size  = 3)) %>%
+  gf_theme(
+        scale_x_continuous(
+          breaks = (-5):5, limits = c(-5, 5),
+          sec.axis = sec_axis(~ . * 2, name = "Difference in sample means")))
+```
+
+You can change the sample size in the Little App. You'll observe the the p-value very much depends on the size of the sample. That is, the p-value reflects two different things:
+
+1. How big is the actual effect, that is the difference between the two group means.
+2. How big your sample is.
+
+To illustrate, here is the diagram for the difference in height between females and males with a sample size of $n_1 = 5$ and $n_2 = 5$. 
+
+```{r two-sample-5,  echo = FALSE}
+set.seed(108)
+draw_diagram(the_formula = height ~ sex, data = Galton %>% group_by(sex) %>% sample_n(size  = 5))
+```
+
+The difference in group means is still about -5 inches. But the slightly larger sample size has resulted in a p-value that shows up as zero in the diagram.
+

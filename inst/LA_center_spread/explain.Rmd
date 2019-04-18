@@ -1,0 +1,25 @@
+### LittleApp: Center-and-spread
+
+The graphic shows a jittered point plot with a quantitative variable on the vertical axis and, optionally, a categorical explanatory variable on the horizontal axis.
+
+By ticking the appropriate boxes you can display various statistics in the graph:
+
+* sample mean
+* confidence interval on the sample mean at the selected confidence level. (Default: 95%) 
+* sample standard deviation
+* median
+
+Open the "**Statistics**" tab underneath the graphic to see numerical values for the displayed statistics.
+
+#### The explanatory variable
+
+When there is an explanatory variable selected, each statistic is calculated separately for each of the groups defined by the explanatory variable.
+
+Depending on the data, the number of points in each of those categorical groups might be close to the same or might be very different. The sample size reflects the total across all the groups.
+
+When "**stratify**" box is checked, sampling is done to place an equal number of points in each group. The sample size now gives the number of points in each group.
+
+#### The graphical display of standard deviation
+
+The standard deviation is one way of describing the "spread" of a variable. It is, of course, a number. The meaning of the standard deviation is better understood as a unit of distance. The standard deviation is therefore being displayed like a unit of distance on a ruler. The mean is at the center of the ruler, and the ruler is marked at distances of ±1 and ±2 standard deviations away from the center.
+

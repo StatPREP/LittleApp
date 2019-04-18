@@ -1,0 +1,126 @@
+---
+output: 
+  html_document: 
+    fig_caption: yes
+---
+
+
+
+# Resampling and Bootstrapping
+
+```{r include = FALSE}
+library(LittleApp)
+library(NHANES)
+library(mosaic)
+library(gganimate)
+library(dplyr)
+library(ungeviz)
+```
+
+## Their role in statistics
+
+One of the important roles of statistics is to quantify the *level of precision* with which a claim can be made. Suppose, for instance, that thermometers could measure temperature only with a precision of ±5°F. This would make it practically impossible to use fever as a diagnostic sign, since fever usually involves a change in body temperature of about 3°F.
+
+Of course, only a silly person would depend on a thermometer whose precision is ±5°F. Most people presume that the precision is more like the smallest division on the thermometer scale, say ±0.1°F. That precision is so fine that a measured temperature of 102.3°F is readily distinguished from a body temperature of 98.6°F and so fever is one of the most important diagnostic signs.
+
+Now imagine a statistical problem. You've measured the blood pressure of 100  healthy people on a low-salt diet. You found a mean systolic pressure of 115 mmHg^["millimeters of mercury", a standard unit for pressure]. Each individual measurement is only precise to about ±5 mmHg, which introduces some random component to the estimate of 115 mmHg. But there's also the variability from person to person; some people have higher or lower  blood pressure than others. This person-to-person variability adds another bit of randomness to our estimate of 115 mmHg. The statistical problem is to figure out how much randomness there is in the estimate of 115 mmHg. Knowing that is important, since we might want to find out if our group on the low-salt diet has a different mean blood pressure than another group, say on a regular diet.
+
+Over the last century, statisticians have developed many ways to figure out how precise is an estimate such as the mean made from data such as the 100-person set of blood-pressure measurements. The underlying logic is alway to imagine that, somehow, another set of data could was collected. And another. And another. And so on many times. With these many sets of data, we could easily infer the precision of an estimate made from a *single* set of data. For instance, we could find the mean blood pressure in each of the many sets of data, and look at the spread of these many means to see the precision of an estimate made on a single set of data.
+
+It would be a lot of work, and is often completely impractical, to collect many sets of data. Instead, statisticians have developed techniques for *simulating* such data sets from the one that we have in hand. These various techniques all get at the same problem, and professionals often use one or the other best suited to the particular situation of their project. This Little App demonstrates one such technique, called "*bootstrapping*" that has some important advantages:
+
+1. It is conceptually simple, making it easier to see how the method works.
+2. It is very widely applicable to many different settings: comparing means or any of a range of statistics such as the standard deviation, median, inter-quartile range; and looking at the strength and form of relationships between variables. 
+
+The primary disadvantage of bootstrapping is that it requires more than a handful of data points. For such small-data problems, say $n < 10$,  techniques based on probability theory rather than simulation are more appropriate. Some people also think that a disadvantage of bootstrapping is that it can only be done using a computer. But this is like saying that email is not as good as snail-mail because email requires a computer.
+
+## Resampling
+
+Recall that the central concept for figuring out the precision of an estimate such as the mean is to *simulate* collecting a new set of data that reflects the amount of randomness introduced by our having used one random sample rather than another that we *might* have collected.
+
+Bootstrapping carries out this simulation in a very specific way. The **One trial** option under "Bootstrap Trials" shows how a single such simulation is generated. The graphic displayed will look something like the following (when the sample size n is 10, the response variable is from the Health data set, `age` is the response variable and there is no explanatory variable):
+
+```{r one-trial-1, echo = FALSE}
+set.seed(101)
+Health <- NHANES %>% select(Age) %>% rename(age = Age)
+This_sample <- 
+  Health %>% 
+  select(age) %>% 
+  sample_n(size = 10) %>% 
+  mutate(xj = seq(0.8, 1.2, length = nrow(.)), group =  "all")
+LittleApp::show_bootstrap_sample_disc(This_sample, age ~ 1, stat = mean)
+```
+***Figure 1**: Showing  the  original sample (the dots) and the points selected in a resampling trial. The  black bar shows the mean value  of the y-variable for the original  data, the blue bar is for the resampling trial.^[The graphic and the movie in Figure 2 are based on a style developed by Claus Wilke and his software in the [`ungeviz`  package.](https://github.com/wilkelab/ungeviz)]*
+
+The randomly collected sample has $n=10$ and consequently there are 10 data points in the graph. (Count them!) The smallest value for age is about 8, the next smallest about 20, then two points at about 32, and so on, up to a maximum of 55 years. Some of the dots are blue and some white, but there are 10 dots altogether. The black line gives the mean of the 10 values of age. The mean is about 39. Of course these number apply only to the particular sample shown in the graph above. The graph on your computer screen will likely have other dots.
+
+Now for the simulation. Imagine $n=10$ blindfolded kids playing "pin the tail on the donkey." But instead of a donkey, the kids will place a sticker on the graph. The data point they select in this manner will be the one closest to their sticker. So after all $n=10$ kids have had their turn, there will be ten stickers. Some of the data points will have just one sticker, some might have two or three. The number of stickers for each data point in this one trial of the game is shown by the white number inside the dots. For instance, the point with age 19 has two stickers, while the point with age 8 has just one sticker. Add up the numbers inside the dots and you'll get exactly 10; one sticker for each of the 10 kids.
+
+Of course, for every dot that has two stickers, there must be a corresponding dot without any stickers at all. Similarly, a dot with three stickers got to be that way because two corresponding dots have no stickers at all.
+
+The pin-the-tail-on-the-donkey process is called "*resampling*", which refers to constructing a new random sample from an existing sample.
+
+Each of the kids picked one dot and their dots each have a value for `age`. Have the ten kids write down these ten values on a piece of poster paper. Then calculate the mean of those ten values. The result will be a mean shown by the blue line, which for the particular trial above falls at age 36. 
+
+That simulated value, 36, is the result of a single *resampling* trial.
+
+To carry out another resampling trial, have the kids play pin the tail on the donkey again. Or, in terms of the Little App controls, press the white "New Trial" button whose logo is a pair of dice.
+
+When you press "New Trial", the 10 original dots stay in their original places. But which of those dots are colored blue and the count displayed in white will change. 
+
+## Bootstrapping
+
+The word "*bootstrapping*" refers to carrying out many trials and collecting the results. The graphic below shows the sort of thing you will see when the "One trial" option is selected and you run many trials.
+
+```{r movie1, echo = FALSE, cache = TRUE}
+bsr <- bootstrapper(20, seed = 101)
+ggplot(data = This_sample, aes(x = xj, y = age)) + geom_blank() +
+    geom_point(shape = 21, size = 6, fill = "white") +
+    geom_text(label = "0", hjust = 0.5, vjust = 0.5, size = 10/.pt, aes(x = xj)) +
+    geom_point(data = bsr,  aes(x = xj, group = .draw),
+               shape = 21, size = 6, fill = "blue", alpha = 1) +
+    geom_text(data = bsr, aes(x = xj, label = .copies, group = .draw),
+              hjust = 0.5, vjust = 0.5, size = 10/.pt, color = "white") +
+  stat_summary_bin(data = bsr, fun.y = "mean",
+               aes(x = 1, group=.draw),
+               width = 0.6, color = "blue", geom  = "hpline",
+               alpha = 1) +
+  stat_summary_bin(data = This_sample,
+               fun.y = "mean", aes(x =  1),  
+               width = 0.6, color = "black", alpha = .6, 
+               geom = "hpline") +
+  xlim(0, 2) +
+  ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank()) +
+  transition_states(.draw, transition_length  = 2, state_length  = 0)
+```
+
+***Figure 2**: An animation of a sequence of resampling trials*
+
+
+The precision of the estimate is indicated by the spread of the blue line across all the trials.  In the movie above,  you see only one trial at a time. But it's  easier to see the spread if the blue lines for *all* the trials  at the same time. To  see that, select the "Many trials" mode. The graph will look somewhat like Figure  3.
+
+The trials show a range of mean values, from  about 33 to 45. This indicates the estimate is 39 ± 6 years of age.
+
+```{r many_trials, echo = FALSE, cache = TRUE}
+bsr <- bootstrapper(30, seed = 101)
+Trials <- bsr(This_sample)
+Stats <- df_stats( age ~ .draw, data  = Trials, the_mean = mean) %>%
+  mutate(group = "all")
+Stats_data <- df_stats(age ~ 1,  data = This_sample, the_mean = mean)
+
+ggplot(data = This_sample) + 
+   geom_point(aes(x = xj, y = age), size = 6,  shape=21, fill = "white") +
+  xlim(0, 2) +
+  ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank()) +
+  geom_hpline(data  = Stats_data, aes(y = the_mean, x = 1), 
+              color = "black",  alpha = 0.75) +
+  geom_hpline(data  = Stats, 
+              aes(y = the_mean, x = 1, group  = .draw), 
+              color = "blue",  alpha = 0.25)  
+```
+
+***Figure 3**: Displaying the results (blue lines) for dozens of trials  (all based on resampling the original data points shown) gives an idea of the  precision of the estimate from the original  data (black line).* 

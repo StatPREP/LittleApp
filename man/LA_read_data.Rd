@@ -4,15 +4,12 @@
 \alias{LA_read_data}
 \title{Load a data set for a Little App}
 \usage{
-LA_read_data(data_name = "Health", package = "littleapp2",
-  url = NULL)
+LA_read_data(data_name = "Health", package = "LittleApp")
 }
 \arguments{
 \item{data_name:}{character string suitable for \code{load()}ing the data}
 
 \item{package:}{character string naming the package where the .rda file exists}
-
-\item{url:}{character string giving the URL of an .rda file.}
 }
 \value{
 An environment holding the components of "basic data"
@@ -36,8 +33,7 @@ or from a package. In this case, the four components will be constructed, but
 }
 \examples{
 \dontrun{
-LA_read_data("Health", package = "littleapp2")
-LA_read_data(url = "http://StatPREP.org/LittleApps/Cars.rda")
+LA_read_data("Health", package = "LittleApp")
 }
 
 }

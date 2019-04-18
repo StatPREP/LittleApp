@@ -13,34 +13,59 @@
 #'
 #' @param data_name: character string suitable for `load()`ing the data
 #' @param package: character string naming the package where the .rda file exists
-#' @param url: character string giving the URL of an .rda file.
 #'
 #' @return An environment holding the components of "basic data"
 #'
 #' @examples
 #' \dontrun{
-#' LA_read_data("Health", package = "littleapp2")
-#' LA_read_data(url = "http://StatPREP.org/LittleApps/Cars.rda")
+#' LA_read_data("Health", package = "LittleApp")
 #' }
 #'
 #' @export
-LA_read_data <- function(data_name = "Health", package = "littleapp2", url = NULL) {
+LA_read_data <- function(data_name = "Health", package = "LittleApp") {
   this_env <- new.env()
-  if (is.null(url)) data(list = data_name, package = package, envir = this_env)
-  else load(url, envir = this_env)
-
-  # if loading an .rda in the wrong format, create the needed structures.
-  if ( ! "frame" %in% names(this_env)) {
-    contents <- ls(this_env)
-    if (length(contents) > 1 ) stop("Ordinary data files should have a single item: a data frame.")
+  #cat("Start reading data\n")
+  data(list = data_name, package = package, envir = this_env)
+  contents <- names(this_env)
+  # if loading an .rda in the wrong format (that is, without documentation)
+  # create the needed structures.
+  if ( ! "frame" %in% contents) {
+    if (length(contents) > 1 )
+      stop("Ordinary data files should have a single item: a data frame.")
     this_env$frame <- this_env[[contents]]
-    remove(list = contents, envir = this_env)
-    this_env$overall <- "No description given."
-    this_env$codebook <- paste("No description for", names(this_env$frame))
-    this_env$codebook <- as.list(this_env$codebook)
-    names(this_env$codebook) <- names(this_env$frame)
-    this_env$types <- LA_var_types(this_env$frame)
   }
-
+  # Setting up types
+  this_env$types <- LA_var_types(this_env$frame)
+  #cat("Setting up documentation\n")
+  if (! "codebook" %in% contents) {
+    # get documentation from package
+    db <- tools::Rd_db(package)
+    doc_contents <- db[[paste0(data_name, ".Rd")]]
+    this_env$codebook <- paste(capture.output(tools::Rd2HTML(doc_contents)),
+                               collapse = "\n")
+  }
+  #cat("Finish reading data\n")
   this_env
 }
+
+# if size is Inf, use all the data.
+#` @export
+get_a_sample <- function(size, stratify, strat_var, vars, frame, seed){
+  frame <- frame[names(frame) %in% vars] %>% na.omit()
+  set.seed(seed)
+  F <-
+    if (size == -1) { # a flag for all the data
+      frame
+    }else if (stratify && strat_var != "1" && !is.numeric(frame[[strat_var]])) {
+      # need to resample in case there are not enough
+      # cases in any given stratum
+      frame %>% group_by(!!as.name(strat_var)) %>%
+        sample_n(size = size, replace = TRUE)
+    }  else {
+      frame %>% sample_n(size = pmin(nrow(frame), size))
+    }
+
+  F
+
+}
+

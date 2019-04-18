@@ -1,0 +1,12 @@
+name: LA_sum_of_square_errors
+title: LA_sum_of_square_errors
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 807568
+bundleId: 1958513
+url: https://dtkaplan.shinyapps.io/LA_sum_of_square_errors/
+when: 1553271625.06365
+asMultiple: FALSE
+asStatic: FALSE
