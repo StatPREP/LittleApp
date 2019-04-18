@@ -18,11 +18,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' LA_read_data("Health", package = "littleapp2")
+#' LA_read_data("Health", package = "LittleApp")
 #' }
 #'
 #' @export
-LA_read_data <- function(data_name = "Health", package = "littleapp2") {
+LA_read_data <- function(data_name = "Health", package = "LittleApp") {
   this_env <- new.env()
   #cat("Start reading data\n")
   data(list = data_name, package = package, envir = this_env)

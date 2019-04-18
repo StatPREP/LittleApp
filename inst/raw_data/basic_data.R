@@ -1,4 +1,4 @@
-#' Create the basic data sets for the LittleApps
+#' Create the basic data sets for apps built  with LittleApp
 #' @details
 #' **Format for a LittleApp data set**
 #' Each Little App data set is a single .rda file with four named components:
@@ -15,7 +15,7 @@
 #'
 
 data(NHANES, package = "NHANES")
-library(littleapp2)
+library(LittleApp)
 
 SDSdata::sds_setup()
 

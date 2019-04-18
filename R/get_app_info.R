@@ -10,12 +10,12 @@
 #' @export
 get_app_info <- function(pattern = NULL) {
   file_names <-
-    dir(path = system.file(package = "littleapp2"),
+    dir(path = system.file(package = "LittleApp"),
         recursive = TRUE,
         pattern = "dcf$")
   file_names <- file_names[grepl("rsconnect", file_names)]
   read_dcf_file <- function(name) {
-    yaml::read_yaml(paste0(system.file(package = "littleapp2"), "/", name))
+    yaml::read_yaml(paste0(system.file(package = "LittleApp"), "/", name))
   }
   whole_set <- lapply(file_names, read_dcf_file)
 

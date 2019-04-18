@@ -9,7 +9,7 @@ output:
 # Resampling and Bootstrapping
 
 ```{r include = FALSE}
-library(littleapp2)
+library(LittleApp)
 library(NHANES)
 library(mosaic)
 library(gganimate)
@@ -48,7 +48,7 @@ This_sample <-
   select(age) %>% 
   sample_n(size = 10) %>% 
   mutate(xj = seq(0.8, 1.2, length = nrow(.)), group =  "all")
-littleapp2::show_bootstrap_sample_disc(This_sample, age ~ 1, stat = mean)
+LittleApp::show_bootstrap_sample_disc(This_sample, age ~ 1, stat = mean)
 ```
 ***Figure 1**: Showing  the  original sample (the dots) and the points selected in a resampling trial. The  black bar shows the mean value  of the y-variable for the original  data, the blue bar is for the resampling trial.^[The graphic and the movie in Figure 2 are based on a style developed by Claus Wilke and his software in the [`ungeviz`  package.](https://github.com/wilkelab/ungeviz)]*
 

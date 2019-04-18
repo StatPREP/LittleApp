@@ -6,7 +6,7 @@ library(shinydashboard)
 library(shinyWidgets)
 library(knitr)
 library(kableExtra)
-library(littleapp2)
+library(LittleApp)
 library(markdown)
 library(mosaic)
 library(ggformula)
@@ -60,7 +60,7 @@ SERVER <- function(input, output, session) {
 
   select_x <- function(x) {
     x %>% filter(numeric &  spread < 10000.0) %>% .$vname %>%
-      littleapp2:::add_choose_none(.,  FALSE)
+      LittleApp:::add_choose_none(.,  FALSE)
   }
   select_y <- LA_selectNumeric()
   select_z <- LA_selectCategorical(max_levels = 8, none = TRUE)
@@ -72,7 +72,7 @@ SERVER <- function(input, output, session) {
   LA_standard_reactives(input, output, session, the_data, app_state)
 
   new_validation_set <- function(){ # Note: not reactive
-    littleapp2:::get_a_sample(
+    LittleApp:::get_a_sample(
       input_sample_size(),
       input_stratify(),
       input$var_x,

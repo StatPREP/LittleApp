@@ -6,7 +6,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
-library(littleapp2)
+library(LittleApp)
 library(markdown)
 library(mosaic)
 library(ggformula)

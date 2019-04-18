@@ -12,7 +12,7 @@ library(shinyWidgets)
 library(shinyjs)
 shinyjs::useShinyjs()
 library("SDSdata")
-library("littleapp2")
+library("LittleApp")
 library("dplyr")
 library("mosaic")
 ```

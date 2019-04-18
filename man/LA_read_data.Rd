@@ -4,7 +4,7 @@
 \alias{LA_read_data}
 \title{Load a data set for a Little App}
 \usage{
-LA_read_data(data_name = "Health", package = "littleapp2")
+LA_read_data(data_name = "Health", package = "LittleApp")
 }
 \arguments{
 \item{data_name:}{character string suitable for \code{load()}ing the data}
@@ -33,7 +33,7 @@ or from a package. In this case, the four components will be constructed, but
 }
 \examples{
 \dontrun{
-LA_read_data("Health", package = "littleapp2")
+LA_read_data("Health", package = "LittleApp")
 }
 
 }

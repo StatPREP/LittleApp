@@ -1,7 +1,7 @@
 ### Little App: t-test
 
 ```{r include=FALSE}
-library(littleapp2)
+library(LittleApp)
 library(mosaic)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```

@@ -47,7 +47,7 @@ If there is not a covariate, the ANOVA report simply re-iterates the F-test pres
 
 #### Graphics
 
-The graphics produced by the app are quite complicated due to the display of the model outputs and raw values on the right-hand  side of the graph. You can make such a graph with the `smoother_plot()` function in the `littleapps`  package. There's is documentation with an example.
+The graphics produced by the app are quite complicated due to the display of the model outputs and raw values on the right-hand  side of the graph. You can make such a graph with the `smoother_plot()` function in the `LittleApp`  package. There's is documentation with an example.
 
 To make conventional graphics showing a straight-line model, use the `gf_lm()` function along with `gf_point()`, for instance ...
 

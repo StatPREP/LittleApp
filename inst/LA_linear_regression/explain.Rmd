@@ -4,7 +4,7 @@
 
 ```{r include = FALSE}
 SDSdata::sds_setup()
-library(littleapp2)
+library(LittleApp)
 ```
 
 To illustrate the app at work, we'll work with one of the very first data sets used to measure genetic heritability, Francis Galton's 1880s measurements of the height of adult children and their parents. Specifically, we'll take the response variable to be the `height` of an adult  and the quantitative explanatory variable to be the person's mother's height. (Maybe you think that tall mothers tend to have tall children? Let's find out!)

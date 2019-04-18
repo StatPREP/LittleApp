@@ -6,5 +6,5 @@
 #' @export
 LA_run <- function(name, where = c("browser", "viewer")) {
   Apps <- get_app_info(name)
-  runApp(system.file(Apps[1,  "name"], package = "littleapp2"))
+  runApp(system.file(Apps[1,  "name"], package = "LittleApp"))
 }
