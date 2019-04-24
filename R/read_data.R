@@ -50,8 +50,9 @@ LA_read_data <- function(data_name = "Health", package = "LittleApp") {
 
 # if size is Inf, use all the data.
 #` @export
-get_a_sample <- function(size, stratify, strat_var, vars, frame, seed){
-  frame <- frame[names(frame) %in% vars] %>% na.omit()
+get_a_sample <- function(size, stratify, strat_var, vars, frame, seed, weights = 1){
+  frame <- frame[names(frame) %in% vars] %>%
+    mutate(.weights. = weights) %>% na.omit()
   set.seed(seed)
   F <-
     if (size == -1) { # a flag for all the data
@@ -60,9 +61,9 @@ get_a_sample <- function(size, stratify, strat_var, vars, frame, seed){
       # need to resample in case there are not enough
       # cases in any given stratum
       frame %>% group_by(!!as.name(strat_var)) %>%
-        sample_n(size = size, replace = TRUE)
+        sample_n(size = size, replace = TRUE, weight = .weights.)
     }  else {
-      frame %>% sample_n(size = pmin(nrow(frame), size))
+      frame %>% sample_n(size = pmin(nrow(frame), size), weight = .weights.)
     }
 
   F
