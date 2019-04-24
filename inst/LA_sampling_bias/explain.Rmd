@@ -1,0 +1,40 @@
+# Sampling bias and confidence intervals
+
+This app displays three things:
+
+1. a sample of a quantitative variable
+2. the confidence interval on the sample mean constructed from (1)
+3. the **population** mean
+
+(3) is  highly unusual and marks this app as a **simulation** of the sampling process rather than as an authentic statistical calculation. Statistical work hardly ever involves the entire population. As such, you would hardly ever know the population mean in genuine work.
+
+Instead, all you've got is the confidence interval calculated from the sample. That is, a genuine display would include only (1) and  (2).  But the confidence interval gives us incomplete information about the population parameter; we can't know the exact value of the parameter from our sample.
+
+## Consequences of sampling bias
+
+Real-world samples often involve some kind of sampling bias. That is, every member of the population is not equally likely to be included in the sample.
+
+Sampling bias can lead to estimation bias. That is, the biased sample can produce a statistic that does not accurately reflect the population paremater.
+
+Without sampling bias, confidence interval are designed so that there is a 95% chance -- or whatever the *confidence  level* is -- that the interval will contain the population parameter.
+
+With sampling bias, the confidence interval comes with no such guarantee. It's entirely possible that the biased sample leads to a confidence interval that *never*  contains the population parameter.
+
+## Creating sampling bias
+
+In genuine work, you would try to minimize sampling bias. But in  this app, you will create sampling bias in order to be able to observe the consequences.
+
+To simulate sampling bias, you can choose a *biasing variable*. For simplicity, the biasing variable in the app will always be categorical. You create the sampling bias by making some levels of the biasing variable more or less likely than other levels to be selected for the sample. The sliders in the app allow you to  set this relative sampling frequency.
+
+If all the sliders are at the same level, there is no sampling bias. Sampling bias occurs when the sliders are *not* at the same level. The consequences of sampling bias will be more apparent the stronger the bias *and* when the biasing variable is closely related to the response variable.
+
+
+
+## Adjustment: dealing with sampling bias
+
+Stratified sampling
+
+Adjustment
+
+
+
