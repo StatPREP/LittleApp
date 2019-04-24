@@ -1,0 +1,12 @@
+name: LA_sampling_bias
+title: LA_sampling_bias
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 888121
+bundleId: 2036247
+url: https://dtkaplan.shinyapps.io/LA_sampling_bias/
+when: 1556126402.71631
+asMultiple: FALSE
+asStatic: FALSE
