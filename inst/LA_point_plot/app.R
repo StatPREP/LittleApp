@@ -31,9 +31,9 @@ UI <- function(request) { #for bookmarking
     dashboardSidebar(
       width = 350,
       p(" "),
-      point_plot_controls,
       LA_data_source(6, covariate = TRUE, facet = TRUE),
-      LA_sample_ui(6)
+      LA_sample_ui(6),
+      point_plot_controls
     ),
 
     LA_body(plot_widget = plotOutput("main_plot", height = "400px",
@@ -57,18 +57,19 @@ SERVER <- function(input, output, session) {
     LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z, select_z)
     LA_standard_reactives(input, output, session, the_data, app_state)
 
-    output$debug_text <- renderText({
-      " "
-    })
+    shinyjs::hide("Debug")
+    # output$debug_text <- renderText({
+    #   " "
+    # })
 
 
     output$main_plot <- renderPlot({
-      xrange <- c(0, 2) # default for no explanatory variable
-      xvar <- get_explanatory_var()
-      if  (length(xvar)  != 1) {
-        if (get_explanatory_type() == "numeric") xrange = range(xvar)
-        else xrange = c(1, length(unique(xvar)) + 0.5)
-      }
+      # xrange <- c(0, 2) # default for no explanatory variable
+      # xvar <- get_explanatory_var()
+      # if  (length(xvar)  != 1) {
+      #   if (get_explanatory_type() == "numeric") xrange = range(xvar)
+      #   else xrange = c(1, length(unique(xvar)) + 0.5)
+      # }
       jitter_h <- jitter_w <- 0
       This_data = get_sample()
       if (input$jitter) {
@@ -95,7 +96,7 @@ SERVER <- function(input, output, session) {
       }
       if (input$show_violin) P <- P %>% add_violin(This_data, input$var_x, input$var_y, 3)
 
-      add_y_ruler( P, x_range = xrange, ruler = input$yruler )
+      add_y_ruler( P, x_range = get_x_range(), ruler = input$yruler )
     })
 
     output$rcode <- renderText({ " "

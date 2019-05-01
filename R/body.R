@@ -40,7 +40,7 @@ LA_body <- function(..., plot_widget = NULL) {
       tabPanel("Statistics", htmlOutput("statistics")),
 
       tabPanel("R commands", htmlOutput("rcode")),
-      tabPanel("Debug",
+      tabPanel("+",
                textOutput("debug_text"),
                plotOutput("debug_plot"),
                tableOutput("debug_table"))

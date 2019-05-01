@@ -47,7 +47,10 @@ UI <- function(request) { #it's a function  for bookmarking
                              # to get a layout you like.
     ),
 
-    LA_body() # The body is entirely pre-defined
+    LA_body(
+      plot_widget = plotOutput("main_plot", height = "400px",
+                               brush = brushOpts(id="yruler",  direction  = "y"))
+    )
   )
 }
 
@@ -141,7 +144,7 @@ SERVER <- function(input, output, session) {
       sec.axis = second_axis)) %>%
       gf_theme(legend.position = "top")
 
-    P
+    add_y_ruler( P, x_range = get_x_range(), ruler = input$yruler )
   }
   )
   # Other built-in output widgets besides output$main_plot

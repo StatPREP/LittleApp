@@ -28,6 +28,15 @@ LA_standard_reactives <-
         range(the_data$frame[[input$var_y]], na.rm = TRUE)
       else c(1, length(unique(the_data$frame[[input$var_y]])))
     })
+    get_x_range <<- reactive({
+      xrange <- c(0, 2) # default for no explanatory variable
+      xvar <- get_explanatory_var()
+      if  (length(xvar)  != 1) {
+        if (get_explanatory_type() == "numeric") xrange = range(xvar)
+        else xrange = c(1, length(unique(xvar)) + 0.5)
+      }
+      return(xrange)
+    })
     get_sample <<- reactive({
       input$new_sample     # for the dependency
       req(the_data$frame)
