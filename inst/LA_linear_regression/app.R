@@ -75,9 +75,15 @@ SERVER <- function(input, output, session) {
   })
 
   output$main_plot <- renderPlot({
-    smoother_plot(get_frame_formula(),
-                  model_formula(),
-                  get_sample(), color = get_color_formula(),
+    req(input$var_y != "1", input$var_x != "1")
+    req(the_data$initialized)
+    frame <- get_frame_formula()
+    model <- get_model_formula()
+    sample <- get_sample()
+    color <- get_color_formula()
+    smoother_plot(frame,
+                  model,
+                  sample, color = color,
                   trace_vert = input$trace_vertically,
                   trace_horiz = input$trace_horizontally,
                   show_mod_vals = input$show_model_values,
@@ -98,4 +104,4 @@ SERVER <- function(input, output, session) {
   # output$debug_table <- renderTable({Your table})
 }
 
-shinyApp(UI, SERVER, enableBookmarking = "url")
+shinyApp(UI, SERVER)

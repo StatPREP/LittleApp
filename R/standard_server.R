@@ -38,13 +38,12 @@ LA_standard_reactives <-
       return(xrange)
     })
     get_sample <<- reactive({
-      input$new_sample     # for the dependency
+      #input$new_sample     # for the dependency but maybe thiis is handled by get_sample_seed
       req(the_data$frame)
-      req(input$var_y != 1) # make sure it's initialized to a variable
       req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
       req(no_explanatory_var() || input$var_x %in% names(the_data$frame))
       # remove the resampling trials
-      isolate(app_state$n_trials <<- 0)
+      #isolate(app_state$n_trials <<- 0)
 
       get_a_sample(input_sample_size(),
                    input_stratify(),
@@ -117,7 +116,7 @@ LA_standard_reactives <-
     })
 
     get_spline_order <<- reactive({
-      if ("spline_order" %in% names(input)) as.numeric(input$spline_order)
+      if ("spline_order" %in% names(input)  && !is.na(input$spline_order)) as.numeric(input$spline_order)
       else 1
     })
 
@@ -218,11 +217,11 @@ LA_standard_reactives <-
       Tmp
     })
 
-    zero_out_trials <<- reactive({
-      app_state$n_trials <<- 0
-      app_state$Trials <<- data.frame()
-      app_state$Trials
-    })
+    # zero_out_trials <<- reactive({
+    #   app_state$n_trials <<- 0
+    #   app_state$Trials <<- data.frame()
+    #   app_state$Trials
+    # })
 
   }
 
@@ -263,22 +262,26 @@ LA_standard_observers <-
 
 
     observe({
+      input$frame
       output$debug_table <- renderTable(the_data$types)
       vnames_y <- select_y(the_data$types)
       vnames_x <- vnames_facet <- select_x(the_data$types)
       vnames_z <- select_z(the_data$types)
-      updateSelectInput(session, "var_y", choices =  vnames_y)
+      updateSelectInput(session, "var_y", choices =  vnames_y,
+                        selected = vnames_y[1])
       updateSelectInput(session, "var_x", choices =  vnames_x,
                         selected = vnames_x[pmin(2, length(vnames_x))])
-      updateSelectInput(session, "covar", choices =  vnames_z)
+      updateSelectInput(session, "covar", choices =  vnames_z,
+                        selected = vnames_z[1])
       if (! is.null(select_facet)) {
         vnames_facet <- select_facet(the_data$types)
-        updateSelectInput(session, "facet_by", choices = vnames_facet)
+        updateSelectInput(session, "facet_by", choices = vnames_facet,
+                          selected = vnames_facet[1])
       }
 
 
       the_data$initialized <<- TRUE
-          })
+    }, priority = 10)
 
 
     observe({
@@ -299,11 +302,11 @@ LA_standard_observers <-
     })
 
     # delete all trials  when new sample or accumulate_trials is turned  off
-    observeEvent({c(input$resample, input$shuffle); get_sample()}, zero_out_trials())
-    observeEvent(input$accumulate_trials,
-                 if (!input$accumulate_trials) zero_out_trials())
+    #observeEvent({c(input$resample, input$shuffle); get_sample()}, zero_out_trials())
+    #observeEvent(input$accumulate_trials,
+    #             if (!input$accumulate_trials) zero_out_trials())
 
-    get_all_trials <<- reactive({ app_state$Trials })
+    #get_all_trials <<- reactive({ app_state$Trials })
 
     observe({
       if (no_explanatory_var() || "numeric" == get_explanatory_type()) shinyjs::hide("stratify")
@@ -316,21 +319,21 @@ LA_standard_observers <-
 
     })
 
-    observeEvent(input$new_trial, {
-      if (isolate(input$accumulate_trials)) {
-        isolate(app_state$n_trials <<- app_state$n_trials + 1)
-        app_state$Trials <<- get_trial() %>%
-          mutate(.trial = isolate(app_state$n_trials)) %>%
-          bind_rows(app_state$Trials, .)
-      } else {
-        isolate(app_state$n_trials <<- 1 )
-        app_state$Trials <<- get_trial() %>%
-          mutate(.trial = isolate(app_state$n_trials))
-      }
-
-      cat(isolate(app_state$n_trials), "trials run\n")
-
-      cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_state$Trials)), "rows\n"))
-    })
+    # observeEvent(input$new_trial, {
+    #   if (isolate(input$accumulate_trials)) {
+    #     isolate(app_state$n_trials <<- app_state$n_trials + 1)
+    #     app_state$Trials <<- get_trial() %>%
+    #       mutate(.trial = isolate(app_state$n_trials)) %>%
+    #       bind_rows(app_state$Trials, .)
+    #   } else {
+    #     isolate(app_state$n_trials <<- 1 )
+    #     app_state$Trials <<- get_trial() %>%
+    #       mutate(.trial = isolate(app_state$n_trials))
+    #   }
+    #
+    #   cat(isolate(app_state$n_trials), "trials run\n")
+    #
+    #   cat(paste("There are", isolate(app_state$n_trials), "with", isolate(nrow(app_state$Trials)), "rows\n"))
+    # })
 
   }

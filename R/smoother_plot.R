@@ -32,6 +32,7 @@ smoother_plot <- function(plot_formula, model_formula, data,
   mod_fun_data <- mosaicModel::mod_eval(mod, nlevels = Inf)
   # Construct model output at data points
   mod_vals <- mosaicModel::mod_eval(mod, data = data)
+
   # figure out where to plot the horizontal bars on the right
   x_range <- range(mod_fun_data[[explan_name]])
   ebar_width <- diff(x_range) / 15
@@ -109,7 +110,6 @@ smoother_plot <- function(plot_formula, model_formula, data,
                 color = "black",
                 hjust = 1)
   }
-
 
   P
 }
