@@ -26,6 +26,7 @@ LA_read_data <- function(data_name = "Health", package = "LittleApp") {
   this_env <- new.env()
   #cat("Start reading data\n")
   data(list = data_name, package = package, envir = this_env)
+
   contents <- names(this_env)
   # if loading an .rda in the wrong format (that is, without documentation)
   # create the needed structures.

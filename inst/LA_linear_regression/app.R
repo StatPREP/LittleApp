@@ -1,12 +1,12 @@
 #
 # Simple linear regression
 #
-library(shiny)
-library(shinydashboard)
-library(LittleApp)
-library(markdown)
-library(mosaic)
-library(ggformula)
+library(shiny, quietly=TRUE)
+library(shinydashboard, quietly=TRUE)
+library(LittleApp, quietly=TRUE)
+library(markdown, quietly=TRUE)
+library(mosaic, quietly=TRUE)
+library(ggformula, quietly=TRUE)
 
 # App-specific controls
 # Define one or more such control boxes with the special controls

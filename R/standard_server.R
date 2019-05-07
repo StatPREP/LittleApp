@@ -229,7 +229,9 @@ LA_standard_reactives <-
 #' @export
 LA_standard_observers <-
   function(input, output, session, the_data, app_state,
-           select_x = function(x) x$vname, select_y = select_x, select_z = select_y, select_facet = NULL){
+           select_x = function(x) x$vname,
+           select_y = select_x, select_z = select_y,
+           select_facet = NULL){
     observe({
       tmp <- unlist(strsplit(input$frame, ":", fixed = TRUE))
       Tmp <- LA_read_data(data_name = tmp[1], package = tmp[2])
@@ -248,7 +250,8 @@ LA_standard_observers <-
       } else {
         output$codebook <- renderText({HTML(the_data$codebook)})
       }
-    })
+    },
+    priority = 10)
 
     # turn off the stratify switch when explanatory variable is numeric
     # but the control retains whatever value it had
