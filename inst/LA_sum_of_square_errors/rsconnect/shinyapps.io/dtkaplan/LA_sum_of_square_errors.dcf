@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 807568
-bundleId: 2079042
+bundleId: 2079057
 url: https://dtkaplan.shinyapps.io/LA_sum_of_square_errors/
-when: 1557698478.43124
+when: 1557698833.08878
 asMultiple: FALSE
 asStatic: FALSE

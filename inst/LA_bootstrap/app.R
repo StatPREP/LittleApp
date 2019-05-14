@@ -116,15 +116,16 @@ SERVER <- function(input, output, session) {
         else
           show_bootstrap_sample_disc(get_sample(), get_frame_formula(), stat = stat_fun)
       } else {
+        ntrials <- as.integer(input$ntrials)
         if (x_type == "numeric") {
           show_bootstrap_ensemble_cont(get_sample(), get_frame_formula(),
-                                       ntrials = input$ntrials,
+                                       ntrials = ntrials,
                                        ns = get_spline_order(),
                                        pt_alpha = 0.5, color = "#0000C050",
                                        se = FALSE)
         } else {
           show_bootstrap_ensemble_disc(get_sample(), get_frame_formula(),
-                                       ntrials = input$ntrials, width = 0.2,
+                                       ntrials = ntrials, width = 0.2,
                                        stat = stat_fun, alpha_pts = 0.5)
         }
       }

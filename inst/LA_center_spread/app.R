@@ -98,7 +98,8 @@ SERVER <- function(input, output, session) {
       plot_data  <- get_sample()
       if (input$var_y %in% names(plot_data)  && input$var_y %in% names(plot_data))  {
         # The next line gets all the accumulated randomization trials.
-        Trials <- get_all_trials()
+        # Trials <- get_all_trials()
+
         level <- as.numeric(input$interval_level)
         mfun <- function(x) mosaicCore::ci.median(level)
 

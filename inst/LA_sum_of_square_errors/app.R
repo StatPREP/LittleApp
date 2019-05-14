@@ -37,7 +37,7 @@ my_special_controls <-
 UI <- function(request) { #it's a function  for bookmarking
   dashboardPage(
     dashboardHeader(
-      title = "Optimizing sum of square errors",
+      title = "Sum of square errors",
       titleWidth = "90%"
     ),
     dashboardSidebar(
@@ -76,12 +76,13 @@ SERVER <- function(input, output, session) {
       input_sample_size(),
       input_stratify(),
       input$var_x,
-      c(input$var_y, input$var_x, input_covar()),
+      c(input$var_x, input$var_y, input_covar()),
       the_data$frame,
       Sys.time() + as.integer(runif(1, min = -100000, max = 100000)))
   }
 
   best_fit <- reactive({
+    cat("In best_fit()\n")
     y <- get_response_var()
     x <- get_explanatory_var()
     mod <- lm(y ~ x)
@@ -96,6 +97,7 @@ SERVER <- function(input, output, session) {
 
 
   observe({
+    cat("Updating sliders\n")
     best <- best_fit()
     updateNoUiSliderInput(session, "slope", range = best$slope_range,
                           value = extendrange(best$slope_range, f = -.2))
@@ -105,6 +107,7 @@ SERVER <- function(input, output, session) {
   })
 
   get_lines  <- reactive({
+    cat("In  get_lines()\n")
     input$new_validation # for the dependency
     best <- best_fit()
     y <- get_response_var()
@@ -120,6 +123,7 @@ SERVER <- function(input, output, session) {
     sse <- numeric(nrow(Slopes))
     XV_sse <- as.data.frame(matrix(0, nrow= nrow(Slopes), ncol  = 25))
     names(XV_sse) <- paste0("xv_", 1:ncol(XV_sse))
+    cat(paste(paste0(capture.output(Slopes), collapse = "\n"), "\n"))
     for (k in  1:nrow(Slopes)) {
       sse[k] <- sum((y - (Slopes$intercepts[k] + x * Slopes$slopes[k]))^2)
       for (j in 1:ncol(XV_sse)) {
@@ -128,11 +132,13 @@ SERVER <- function(input, output, session) {
                                (Slopes$intercepts[k] + VS[[2]] * Slopes$slopes[k]))^2)
       }
     }
+    cat(paste(paste0(capture.output(sse),  collapse = ", "), "\n"))
     Slopes$sse <- sse
 
     bind_cols(Slopes,  XV_sse)
   })
   output$sse_plot <- renderPlot({
+    cat("SSE plot\n")
     Lines <- get_lines()
     Performance <- Lines %>% dplyr::select(-slopes, -offsets, -intercepts)
     XV <- tidyr::gather(dplyr::select(Performance, -sse),
@@ -145,7 +151,8 @@ SERVER <- function(input, output, session) {
       gf_theme(legend.position = "none")
   })
   output$main_plot <- renderPlot({
-    best <- best_fit()
+    cat("Main plot\n")
+    best <- isolate(best_fit())
     Lines <- get_lines()
     P <- standard_dot_plot()
     if (input$confband) P <- P %>%  gf_lm(interval = "confidence", color = NA)
