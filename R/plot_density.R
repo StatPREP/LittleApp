@@ -85,7 +85,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
      label_positions <- (dpos[-1] + dpos[-length(dpos)]) / 2.0
      Foo <- tibble(x = label_positions, y = mean(Tmp$y) / 2,
                                short = short_labels, label = labels)
-     Foo <- Foo %>% left_join(In_groups) %>%
+     Foo <- Foo %>% left_join(In_groups, by = "label") %>%
        mutate(percent = round(percent, 1)) %>% na.omit()
      if (show_percent) Foo$short <- paste0(Foo$short, ": ", sprintf("%3.1f", Foo$percent), "%")
 
@@ -109,7 +109,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
       # create a column of integers to center the violins around
       mutate(xpos = as.numeric(as.factor(level))) %>%
       # scale the densities so that the maximimum is <vwidth>
-      left_join(Density_scale) %>%
+      left_join(Density_scale, by = "label") %>%
       mutate(y = vwidth * y / max(scale)) %>%
       mutate(left = xpos - y, right = xpos + y) %>%
       na.omit()
@@ -126,7 +126,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
     if(show_normal) { # Turn the theory into violins
       Normal <- Normal %>%
         mutate(xpos = as.numeric(as.factor(level))) %>%
-        left_join(Density_scale) %>%
+        left_join(Density_scale, by = "label") %>%
         mutate(y  =  vwidth * y / max(scale)) %>%
         mutate(left = xpos - y, right = xpos + y) %>%
         na.omit()
@@ -134,7 +134,7 @@ plot_density_y <- function(yvar=NULL, xvar = "all", violin = FALSE,
         gf_segment(x + x ~ left + right, data = Normal, alpha = 0.45, color = "white")
       Stripes <- Stripes %>%
         mutate(xpos = as.numeric(as.factor(level))) %>%
-        left_join(Density_scale) %>%
+        left_join(Density_scale, by = "label") %>%
         mutate(y  =  vwidth * y / max(scale)) %>%
         mutate(left = xpos - y, right = xpos + y) %>%
         na.omit()

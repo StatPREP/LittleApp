@@ -18,13 +18,13 @@ my_special_controls <-
   box(title = "Define common/rare", width = 12, background = "black",
       status = "primary", solidHeader = TRUE,
       noUiSliderInput("common", "Range for common", min = 0, max  = 1,
-                  value = c(.25,  .75)),
+                  value = c(.75,  .25)),
 
        noUiSliderInput("rare_left", "Rare (left)",  inline = TRUE,
-                       min = 0, max = 1, value = 0.5, width = '45%'),
+                       min = -10, max = -9, value = -9.5, width = '45%'),
        span("    "),
        noUiSliderInput("rare_right",  "Rare (right)",  inline = TRUE,
-                       min = 0, max  = 1, value = 0.5, width = '45%'),
+                       min = -10, max  = -9, value = -9.5, width = '45%'),
       collapsible = FALSE, collapsed = FALSE,
       checkboxInput("show_normal", "Overlay normal dist", value = FALSE),
       checkboxInput("show_violin", "Show as violin", value = FALSE) %>%
@@ -65,29 +65,35 @@ SERVER <- function(input, output, session) {
 
   # Add your own renderers, reactives, and observers here.
 
-  observe({
-    Y <- get_response_var()
-    response_range <- extendrange(Y, f = 0.1)
-    sensible <- as.numeric(quantile(Y, c(.1, .9)))
-    updateNoUiSliderInput(session, "common", range = response_range,
-                          value = sensible)
-  })
-  observe({
-    # Keep the  definition  of rare OUTSIDE the range of common.
-    response_range <- extendrange(get_response_var(), f = 0.13)
+  observe(priority = 100, {
+    input$var_y
+    Y <- isolate(get_response_var())
 
+    sensible <- as.numeric(quantile(Y, c(.1, .9)))
+    updateNoUiSliderInput(session, "common", range = range(Y))
+    updateNoUiSliderInput(session, "common", value = sensible)
+    #response_range <- extendrange(Y, f = 0.1)
+
+  })
+  observeEvent(input$common, {
+    Y <- get_response_var()
+    # Keep the  definition  of rare OUTSIDE the range of common.
+
+    response_range <- extendrange(Y, f = 0.1)
     left <- input$common[1]
     right <- input$common[2]
     rare_left <- input$rare_left
     rare_right <- input$rare_right
-    if (rare_left > left)
+    if (rare_left > left || rare_left < response_range[1]) {
       rare_left <- response_range[1] + (left - response_range[1])/2
-    if (rare_right < right)
+      updateNoUiSliderInput(session, "rare_left", range = c(response_range[1], left),
+                            value = rare_left)
+    }
+    if (rare_right < right || rare_right > response_range[2]) {
       rare_right <-  response_range[2] + (right - response_range[2])/2
-    updateNoUiSliderInput(session, "rare_left", range = c(response_range[1], left),
-                          value = rare_left)
-    updateNoUiSliderInput(session, "rare_right", range = c(right, response_range[2]),
-                          value = rare_right)
+      updateNoUiSliderInput(session, "rare_right", range = c(right, response_range[2]),
+                            value = rare_right)
+    }
   })
   our_labels <- reactive({
     c("rare_left", "uncommon_left",
@@ -96,8 +102,15 @@ SERVER <- function(input, output, session) {
   })
   output$main_plot <- renderPlot({
     req(input$common,  input$rare_left, input$rare_right)
+    if (input$rare_right < input$common[2]) return() # in a transient state
     if (input$rare_right == input$rare_left) return() # not yet initialized
-    plot_density_y(yvar=get_response_var(),
+    Y <- get_response_var()
+    grand_range <- range(Y)
+    bigger_range <- extendrange(Y, f = .15)
+    if (input$rare_right > bigger_range[2] || input$rare_left < bigger_range[1]) return()
+    if (any(input$common > grand_range[2]) || any(input$common < grand_range[1])) return()
+   # cat("Breaks at", c(input$rare_left, input$common, input$rare_right), "\n")
+    plot_density_y(yvar=Y,
                    xvar = get_explanatory_var(),
                    violin = input$show_violin,
                    show_normal  = input$show_normal,
