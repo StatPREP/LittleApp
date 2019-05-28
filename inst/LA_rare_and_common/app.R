@@ -123,7 +123,7 @@ SERVER <- function(input, output, session) {
   # Other built-in output widgets besides output$main_plot
   # output$codebook <- renderText({ Your HTML })
     output$statistics <- renderText({
-      cat("Writing table\n")
+      #cat("Writing table\n")
       this_data <- tibble(y = get_response_var(), x = get_explanatory_var())
       this_data$label <-
         cut(this_data$y,
