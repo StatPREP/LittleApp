@@ -3,6 +3,7 @@
 #
 library(shiny)
 library(shinydashboard)
+library(SDSdata)
 library(LittleApp)
 library(markdown)
 library(mosaic)

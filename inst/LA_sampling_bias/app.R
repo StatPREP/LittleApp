@@ -5,6 +5,7 @@ library(shiny)
 library(shinydashboard)
 library(LittleApp)
 library(markdown)
+library(SDSdata)
 library(mosaic)
 library(mosaicCore)
 library(ggformula)
@@ -74,9 +75,20 @@ SERVER <- function(input, output, session) {
   # turn off the sliders at the beginning
   for (k in  1:5) shinyjs::hide(paste0("level", k))
 
+  observe({ #hide sliders when no covariate
+    if (input$covar == "1") {
+      for (slider in 1:5){
+        this_slider <- paste0("level", slider)
+        shinyjs::hide(this_slider)
+      }
+    }
+  })
+
   get_weights <- reactive({
     #  cat("get_weights()\n")
-    if (input$covar == 1)  return() # not initialized
+    if (input$covar == 1)  {
+      return() # not initialized
+    }
     bias_var <- the_data$frame[[input$covar]]
     levels <-
       if  (is.factor(bias_var)) levels <- na.omit(levels(bias_var))

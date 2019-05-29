@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 678189
-bundleId: 2022105
+bundleId: 2114715
 url: https://dtkaplan.shinyapps.io/LA_center_spread/
-when: 1555618817.48396
+when: 1559086198.90234
 asMultiple: FALSE
 asStatic: FALSE

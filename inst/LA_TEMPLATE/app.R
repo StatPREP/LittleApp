@@ -4,6 +4,7 @@
 library(shiny)
 library(shinydashboard)
 library(LittleApp)
+library(SDSdata)
 library(markdown)
 library(mosaic)
 library(ggformula)
