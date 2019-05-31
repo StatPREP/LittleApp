@@ -68,10 +68,14 @@ SERVER <- function(input, output, session) {
     select_x <- LA_selectCategorical(max_levels = 8, none = TRUE)
     select_y <- LA_selectNumeric()
     select_z <- LA_selectNone()
+    select_facet <- NULL # for most apps
 
     # Reactives and observers used throughout the various Little Apps
-    LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
-    LA_standard_reactives(input, output, session, the_data, app_state)
+    source(system.file("Reactives.R", package = "LittleApp"),
+           local = TRUE)
+
+    #LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
+    #LA_standard_reactives(input, output, session, the_data, app_state, environment())
 
     output$debug_text <- renderText({
       input$new_trial
