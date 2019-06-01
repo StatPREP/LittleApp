@@ -4,7 +4,8 @@
 \alias{LA_standard_reactives}
 \title{Basic  server elements for Little Apps}
 \usage{
-LA_standard_reactives(input, output, session, the_data, app_state)
+LA_standard_reactives(input, output, session, the_data, app_state,
+  calling_env)
 }
 \description{
 Randy points out that I need to document this and have a list of the
