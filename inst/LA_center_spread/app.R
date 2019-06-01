@@ -1,13 +1,13 @@
 #
 # Center and spread
 #
-library(shiny)
-library(shinydashboard)
-library(SDSdata)
-library(LittleApp)
-library(markdown)
-library(mosaic)
-library(ggformula)
+library(shiny, quietly = TRUE, verbose = FALSE)
+library(shinydashboard, quietly = TRUE, verbose = FALSE)
+library(SDSdata, quietly = TRUE, verbose = FALSE)
+library(LittleApp, quietly = TRUE, verbose = FALSE)
+library(markdown, quietly = TRUE, verbose = FALSE)
+library(mosaic, quietly = TRUE, verbose = FALSE)
+library(ggformula, quietly = TRUE, verbose = FALSE)
 
 # App-specific controls
 choose_stats <-
@@ -71,8 +71,6 @@ SERVER <- function(input, output, session) {
     select_facet <- NULL # for most apps
 
     # Reactives and observers used throughout the various Little Apps
-    #source(system.file("Reactives.R", package = "LittleApp"), local = TRUE)
-
     LA_standard_reactives(input, output, session, the_data, app_state, environment())
     LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
 

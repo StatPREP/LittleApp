@@ -6,39 +6,39 @@
 #' @export
 LA_standard_reactives <-
   function(input, output, session, the_data, app_state, calling_env) {
-    input_sample_size <- reactive({
+    input_sample_size <<- reactive({
       if ("samp_size" %in% names(input)) as.integer(req(input$samp_size))
       else -1 # flag for all the  data
     })
-    assign("input_sample_size", input_sample_size, env = calling_env)
+    # # assign("input_sample_size", input_sample_size, env = calling_env)
 
-    input_stratify <- reactive({
+    input_stratify <<- reactive({
       if ("stratify" %in% names(input)) input$stratify
       else FALSE
     })
-    assign("input_stratify", input_stratify, env = calling_env)
+    # assign("input_stratify", input_stratify, env = calling_env)
 
-    input_covar <- reactive({
+    input_covar <<- reactive({
       if ("covar" %in% names(input)) input$covar
       else 1
     })
-    assign("input_covar", input_covar, env = calling_env)
+    # assign("input_covar", input_covar, env = calling_env)
 
-    get_overall_sample_size <- reactive({
+    get_overall_sample_size <<- reactive({
       # handles when the sample is stratified
       nrow(get_sample())
     })
-    assign("get_overall_sample_size", get_overall_sample_size, env = calling_env)
+    # assign("get_overall_sample_size", get_overall_sample_size, env = calling_env)
 
     # The whole range, not just the range of the sample
-    get_y_range <- reactive({
+    get_y_range <<- reactive({
       if (get_response_type() == "numeric")
         range(the_data$frame[[input$var_y]], na.rm = TRUE)
       else c(1, length(unique(the_data$frame[[input$var_y]])))
     })
-    assign("get_y_range", get_y_range, env = calling_env)
+    # assign("get_y_range", get_y_range, env = calling_env)
 
-    get_x_range <- reactive({
+    get_x_range <<- reactive({
       xrange <- c(0, 2) # default for no explanatory variable
       xvar <- get_explanatory_var()
       if  (length(xvar)  != 1) {
@@ -47,9 +47,9 @@ LA_standard_reactives <-
       }
       return(xrange)
     })
-    assign("get_x_range", get_x_range, env = calling_env)
+    # assign("get_x_range", get_x_range, env = calling_env)
 
-    get_sample <- reactive({
+    get_sample <<- reactive({
       #input$new_sample     # for the dependency but maybe thiis is handled by get_sample_seed
       req(the_data$frame)
       req(input$var_y %in% c(names(the_data$frame))) # that's in the data frame
@@ -64,31 +64,31 @@ LA_standard_reactives <-
                    the_data$frame,
                    get_sample_seed())
     })
-    assign("get_sample", get_sample, env = calling_env)
+    # assign("get_sample", get_sample, env = calling_env)
 
 
     # Need this intermediate, because sometimes there is no explanatory variable
     # This will be signaled by NA
-    get_explanatory_var <- reactive({
+    get_explanatory_var <<- reactive({
       if (no_explanatory_var()) 1
       else get_sample()[[input$var_x]]
     })
-    assign("get_explanatory_var", get_explanatory_var, env = calling_env)
+    # assign("get_explanatory_var", get_explanatory_var, env = calling_env)
 
-    get_response_var <- reactive({
+    get_response_var <<- reactive({
       get_sample()[[req(input$var_y)]]
     })
-    assign("get_response_var", get_response_var, env = calling_env)
+    # assign("get_response_var", get_response_var, env = calling_env)
 
-    get_explanatory_type <- reactive({
+    get_explanatory_type <<- reactive({
       X <- get_explanatory_var()
       if (length(X) == 1) return("constant")
       else if (is.numeric(X)) return("numeric")
       else return("categorical")
     })
-    assign("get_explanatory_type", get_explanatory_type, env = calling_env)
+    # assign("get_explanatory_type", get_explanatory_type, env = calling_env)
 
-    get_response_type <- reactive({
+    get_response_type <<- reactive({
       # categorical, numeric, logical, probability
       if (input$var_y == "1") return("invalid") # not yet initialized
       Y <- get_response_var()
@@ -100,9 +100,9 @@ LA_standard_reactives <-
         else return("numeric")
       }
     })
-    assign("get_response_type", get_response_type, env = calling_env)
+    # assign("get_response_type", get_response_type, env = calling_env)
 
-    get_covar_discrete <- reactive({
+    get_covar_discrete <<- reactive({
       # This will always be discrete
       values <- if (! "covar" %in% names(input)) 1
       else get_sample()[[input$covar]]
@@ -111,9 +111,9 @@ LA_standard_reactives <-
 
       values
     })
-    assign("get_covar_discrete", get_covar_discrete, env = calling_env)
+    # assign("get_covar_discrete", get_covar_discrete, env = calling_env)
 
-    get_facet_var <- reactive({
+    get_facet_var <<- reactive({
       # this will always be discrete
       values <- if (! "facet_by" %in% names(input)) 1
                 else get_sample()[[input$facet_by]]
@@ -122,64 +122,64 @@ LA_standard_reactives <-
 
       values
     })
-    assign("get_facet_var", get_facet_var, env = calling_env)
+    # assign("get_facet_var", get_facet_var, env = calling_env)
 
     # Inf if numeric and more than 10, the actual number of levels otherwise
-    get_n_explanatory_groups <- reactive({
+    get_n_explanatory_groups <<- reactive({
       X <- get_explanatory_var()
       n_unique <- length(unique(X))
       if (is.numeric(X) && n_unique >= 10) Inf
       else n_unique
     })
-    assign("get_n_explanatory_groups", get_n_explanatory_groups, env = calling_env)
+    # assign("get_n_explanatory_groups", get_n_explanatory_groups, env = calling_env)
 
     # Formula  for  y  ~  x with faceting
-    get_frame_formula <- reactive({
+    get_frame_formula <<- reactive({
       req(input$var_y, input$var_x)
       as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
     })
-    assign("get_frame_formula", get_frame_formula, env = calling_env)
+    # assign("get_frame_formula", get_frame_formula, env = calling_env)
 
-    get_spline_order <- reactive({
+    get_spline_order <<- reactive({
       if ("spline_order" %in% names(input)  && !is.na(input$spline_order)) as.numeric(input$spline_order)
       else 1
     })
-    assign("get_spline_order", get_spline_order, env = calling_env)
+    # assign("get_spline_order", get_spline_order, env = calling_env)
 
-    jitter_height <- reactive({
+    jitter_height <<- reactive({
       if ("jitter_height" %in% names(input)) input$jitter_height
       else if (get_explanatory_type() == "numeric") 0
       else 0.2
     })
-    assign("jitter_height", jitter_height, env = calling_env)
+    # assign("jitter_height", jitter_height, env = calling_env)
 
-    jitter_width <- reactive({
+    jitter_width <<- reactive({
       if ("jitter_width" %in% names(input)) input$jitter_width
       else if (get_response_type() == "numeric") 0
       else 0.2
     })
-    assign("jitter_width", jitter_width, env = calling_env)
+    # assign("jitter_width", jitter_width, env = calling_env)
 
-    dot_alpha <- reactive({
+    dot_alpha <<- reactive({
       if ("dot_alpha" %in% names(input)) input$dot_alpha
       else LA_point_alpha(get_overall_sample_size())
     })
-    assign("dot_alpha", dot_alpha, env = calling_env)
+    # assign("dot_alpha", dot_alpha, env = calling_env)
 
-    get_color_formula <- reactive({
+    get_color_formula <<- reactive({
         if (no_covariate()) "black"
         else as.formula(glue::glue(" ~ {input_covar()}"))
     })
-    assign("get_color_formula", get_color_formula, env = calling_env)
+    # assign("get_color_formula", get_color_formula, env = calling_env)
 
-    get_sample_seed <- reactive({
+    get_sample_seed <<- reactive({
       # reset the seed each time the "new sample" button is pressed
       input$new_sample
       Sys.time()
     })
-    assign("get_sample_seed", get_sample_seed, env = calling_env)
+    # assign("get_sample_seed", get_sample_seed, env = calling_env)
 
-    standard_dot_plot <- reactive({
+    standard_dot_plot <<- reactive({
       LA_dot_layer(get_frame_formula(),
                    data = get_sample(),
                    color = get_color_formula(),
@@ -187,21 +187,21 @@ LA_standard_reactives <-
                    height = jitter_height(),
                    alpha = dot_alpha())
     })
-    assign("standard_dot_plot", standard_dot_plot, env = calling_env)
+    # assign("standard_dot_plot", standard_dot_plot, env = calling_env)
 
 
-    no_explanatory_var <- reactive({
+    no_explanatory_var <<- reactive({
       req(input$var_x) == "1"
     })
-    assign("no_explanatory_var", no_explanatory_var, env = calling_env)
+    # assign("no_explanatory_var", no_explanatory_var, env = calling_env)
 
-    no_covariate <- reactive({
+    no_covariate <<- reactive({
       req(input_covar()) == "1"
     })
-    assign("no_covariate", no_covariate, env = calling_env)
+    # assign("no_covariate", no_covariate, env = calling_env)
 
     #  no interaction
-    get_model_formula <- reactive({
+    get_model_formula <<- reactive({
       order <- get_spline_order()
       # For zeroth order, use -input$var_x so that mod_eval knows var_x is an "input"
       if (order == 0) string <- glue::glue("{input$var_y} ~ (1 - {input$var_x})")
@@ -212,11 +212,11 @@ LA_standard_reactives <-
 
       as.formula(string)
     })
-    assign("get_model_formula", get_model_formula, env = calling_env)
+    # assign("get_model_formula", get_model_formula, env = calling_env)
 
     # a potentially curvy formula (natural cubic splines)
     # with a linear interaction with the covariate
-    get_flexible_formula <- reactive({
+    get_flexible_formula <<- reactive({
       order <- get_spline_order()
       if (order == 0) return(get_model_formula())
       else if (order == 1) string <- glue::glue("{input$var_y} ~ {input$var_x}")
@@ -226,9 +226,9 @@ LA_standard_reactives <-
 
       as.formula(string)
     })
-    assign("get_flexible_formula", get_flexible_formula, env = calling_env)
+    # assign("get_flexible_formula", get_flexible_formula, env = calling_env)
 
-    get_resample <- reactive({
+    get_resample <<- reactive({
       cat("New resampling trial.\n")
       the_samp <- get_sample()
       if (input$stratify) {  #resample within groups
@@ -241,8 +241,8 @@ LA_standard_reactives <-
         the_samp %>% sample_n(size = nrow(the_samp), replace = TRUE)
       }
     })
-    assign("get_resample", get_resample, env = calling_env)
-    get_trial <- reactive({
+    # assign("get_resample", get_resample, env = calling_env)
+    get_trial <<- reactive({
       Tmp <-
         if (input$resample) get_resample()
       else get_a_sample(get_sample_size(),
@@ -259,7 +259,7 @@ LA_standard_reactives <-
       Tmp
     })
 
-    assign("get_trial", get_trial, env = calling_env)
+    # assign("get_trial", get_trial, env = calling_env)
   }
 
 #' @export
@@ -338,10 +338,10 @@ LA_standard_observers <-
       }
     })
 
-    # observe({
-    #   if (no_explanatory_var() || "numeric" == get_explanatory_type()) shinyjs::hide("stratify")
-    #   else shinyjs::show("stratify")
-    # })
+    observe({
+      if (no_explanatory_var() || "numeric" == get_explanatory_type()) shinyjs::hide("stratify")
+      else shinyjs::show("stratify")
+    })
 
     observe({
       if ("facet_by" %in% names(input))
