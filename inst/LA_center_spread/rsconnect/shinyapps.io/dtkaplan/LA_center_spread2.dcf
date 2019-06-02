@@ -1,0 +1,12 @@
+name: LA_center_spread2
+title: LA_center_spread2
+username:
+account: dtkaplan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 959981
+bundleId: 2122465
+url: https://dtkaplan.shinyapps.io/LA_center_spread2/
+when: 1559351844.10105
+asMultiple: FALSE
+asStatic: FALSE

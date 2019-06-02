@@ -41,7 +41,7 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
   }
   if (show_t) {
     tmp <- stats::t.test(formula, data = data,
-                         var.equal = var_equal)
+                         var.equal = var_equal, conf.level = level)
 
     left_mean <- tmp$estimate[2]
     res <- left_mean + tmp$conf.int
