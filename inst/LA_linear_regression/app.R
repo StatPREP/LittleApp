@@ -63,8 +63,8 @@ SERVER <- function(input, output, session) {
   # Reactives and observers used throughout the various Little Apps
   the_data <- reactiveValues()
   app_state <- reactiveValues(n_trials = 0, Trials = data.frame())
-  LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
-  LA_standard_reactives(input, output, session, the_data, app_state)
+  LA_standard_observers()(input, output, session, the_data, app_state, select_x, select_y, select_z)
+  LA_standard_reactives()(input, output, session, the_data, app_state)
 
   # Add your own renderers, reactives, and observers here.
   # For instance ...
