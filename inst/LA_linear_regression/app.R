@@ -78,7 +78,7 @@ SERVER <- function(input, output, session) {
     req(input$var_y != "1", input$var_x != "1")
     req(the_data$initialized)
     frame <- get_frame_formula()
-    model <- get_model_formula()
+    model <- model_formula()
     sample <- get_sample()
     color <- get_color_formula()
     smoother_plot(frame,

@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 683659
-bundleId: 2067698
+bundleId: 2124756
 url: https://dtkaplan.shinyapps.io/LA_linear_regression/
-when: 1557263279.43899
+when: 1559472201.96897
 asMultiple: FALSE
 asStatic: FALSE
