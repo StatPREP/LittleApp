@@ -169,7 +169,10 @@ SERVER <- function(input, output, session) {
       }
       return(P)
     })
-    output$main_plot <- renderPlot({ construct_plot() })
+    output$main_plot <- renderPlot({
+      construct_plot() %>%
+        gf_theme(theme_bw(base_size = 16))
+      })
     output$little_copy <- renderPlot({
       construct_plot()
     })

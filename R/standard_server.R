@@ -5,8 +5,7 @@
 #'
 #' @export
 LA_standard_reactives <-
-  #function(input, output, session, the_data, app_state, calling_env)
-  quote({
+  function(input, output, session, the_data, app_state, calling_env) {
     input_sample_size <- reactive({
       if ("samp_size" %in% names(input)) as.integer(req(input$samp_size))
       else -1 # flag for all the  data
@@ -261,15 +260,14 @@ LA_standard_reactives <-
     })
 
     # assign("get_trial", get_trial, env = calling_env)
-  })
+  }
 
 #' @export
 LA_standard_observers <-
-  # function(input, output, session, the_data, app_state,
-  #          select_x = function(x) x$vname,
-  #          select_y = select_x, select_z = select_y,
-  #          select_facet = NULL)
-  quote({
+  function(input, output, session, the_data, app_state,
+           select_x = function(x) x$vname,
+           select_y = select_x, select_z = select_y,
+           select_facet = NULL) {
     observe({
       tmp <- unlist(strsplit(input$frame, ":", fixed = TRUE))
       Tmp <- LA_read_data(data_name = tmp[1], package = tmp[2])
@@ -351,4 +349,4 @@ LA_standard_observers <-
 
     })
 
-  })
+  }

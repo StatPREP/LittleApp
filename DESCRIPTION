@@ -25,7 +25,9 @@ Imports:
     tidyr, 
     broom,
     ungeviz,
-    natality2014
+    natality2014,
+    scales,
+    ggthemes
 Suggests: 
     knitr,
     rmarkdown,
