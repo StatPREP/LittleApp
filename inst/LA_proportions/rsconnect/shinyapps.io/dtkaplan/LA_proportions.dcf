@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 848617
-bundleId: 2116095
+bundleId: 2127536
 url: https://dtkaplan.shinyapps.io/LA_proportions/
-when: 1559144008.76164
+when: 1559582773.89641
 asMultiple: FALSE
 asStatic: FALSE

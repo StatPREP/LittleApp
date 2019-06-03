@@ -64,7 +64,10 @@ SERVER <- function(input, output, session) {
     # })
 
 
-    output$main_plot <- renderPlot({make_point_plot()})
+    output$main_plot <- renderPlot({
+      make_point_plot() %>%
+        gf_theme(theme_bw(base_size = 16))
+      })
 
     make_point_plot <- reactive({
       jitter_h <- jitter_w <- 0
