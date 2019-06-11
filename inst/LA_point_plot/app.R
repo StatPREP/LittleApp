@@ -53,6 +53,7 @@ SERVER <- function(input, output, session) {
     #select_x <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
     select_y <- select_x <- LA_selectAll()
     select_z <- LA_selectAll(none = TRUE)
+    select_facet <- select_z
 
     # Reactives and observers used throughout the various Little Apps
     # LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z, select_z)
@@ -115,6 +116,8 @@ SERVER <- function(input, output, session) {
     ###############################
     #
     # Standard server components
+    #
+    # Copy this into each little app
     #
     ###############################
 
@@ -451,6 +454,7 @@ SERVER <- function(input, output, session) {
         updateSelectInput
 
     })
+
 
 
 }

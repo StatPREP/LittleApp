@@ -1,5 +1,5 @@
 #
-#  jittering
+# F and Effect
 #
 
 library(shiny)
@@ -9,40 +9,38 @@ library(LittleApp)
 library(SDSdata)
 library(markdown)
 library(mosaic)
+library(mosaicModel)
 library(ggformula)
 library(DT)
+library(forcats)
 
 # App-specific controls
-jitter_controls <-
-  box(title = "Jitter controls", width = 6, background = "black",
+point_plot_controls <-
+  box(title = "Annotations", width = 6, background = "black",
       status = "primary", solidHeader = TRUE,
       collapsible = FALSE, collapsed = FALSE,
-      noUiSliderInput("jitter_width",  "Jitter width",
-                  min = 0, max = 1, value = 0.0) ,
-      noUiSliderInput("jitter_height", "Jitter height", orientation  = "vertical",
-                  min = 0, max = 1, value = 0.0, height = "200px", direction = "rtl"),
-      noUiSliderInput("jitter_alpha",  "Transparency",
-                  min = 0, max = 1, value = 1),
-      hr(),
-      checkboxInput("violin", "Show violin plot") %>%
-        tighten(bottom = -10)
+      checkboxInput("show_model", "Show model", value = TRUE),
+      checkboxInput("show_ci", "Show conf. interval", value = FALSE),
+      checkboxInput("show_R", "Show model values", value = FALSE),
+      checkboxInput("jitter",  "Jitter categorical variables.", value = TRUE) %>% tighten(bottom = -10)
   )
 
 UI <- function(request) { #for bookmarking
   dashboardPage(
     dashboardHeader(
-      title = "Jittered point plots",
+      title = "Explaining variation",
       titleWidth = "90%"
     ),
     dashboardSidebar(
       width = 350,
       p(" "),
-      jitter_controls,
-      LA_data_source(6, covariate = FALSE),
-      LA_sample_ui(6)
+      LA_data_source(6, covariate = TRUE, facet = FALSE),
+      LA_sample_ui(6),
+      point_plot_controls
     ),
 
-    LA_body()
+    LA_body(plot_widget = plotOutput("main_plot", height = "400px",
+                                     brush = brushOpts(id="yruler",  direction  = "y")))
   )
 }
 
@@ -54,57 +52,139 @@ SERVER <- function(input, output, session) {
 
 
     # Choose the variables
-    select_x <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
-    select_y <- function(x) x %>% .$vname
-    select_z <- function(x) character(0) # no covariates possible
+    #select_x <- function(x) x %>% filter(!numeric, n_levels <= 5) %>% .$vname
+    select_y <- select_x <- LA_selectAll()
+    select_z <- LA_selectAll(none = TRUE)
     select_facet <- select_z
 
-    # Reactives and observers used throughout the various Little Apps
-    #LA_standard_observers(input, output, session, the_data, app_state, select_x, select_y, select_z)
-    #LA_standard_reactives(input, output, session, the_data, app_state)
+    shinyjs::hide("Debug")
 
-    output$debug_text <- renderText({
-      input$new_trial
-      app_state$n_trials
-      app_state$Trials
-      input$accumulate_trials
-      input$resample
-      input$shuffle
-      glue::glue("{req(app_state$n_trials)} trials taken so {nrow(app_state$Trials)} rows of randomization trial data.\n")
-    })
 
-    construct_plot <- reactive({
-      req(input$var_y, input$var_x)
-      req(the_data$initialized)
 
-      # Make the plot
-      the_formula <- as.formula(glue::glue("{input$var_y} ~ {input$var_x}"))
-      plot_data  <- get_sample()
-      if (input$var_y %in% names(plot_data)  && input$var_y %in% names(plot_data))  {
-        P <-
-          get_sample()  %>%
-          gf_jitter( the_formula, seed = 101,
-                     width = input$jitter_width,
-                     height = input$jitter_height,
-                     alpha = input$jitter_alpha)
-        if (input$violin) P <- P %>% gf_violin(alpha = 0.2, fill = "blue")
-      } else {
-        P <- gf_text(1 ~ 1, label = "New data set arriving ...") %>% gf_theme(theme_void())
-      }
-      return(P)
-    })
     output$main_plot <- renderPlot({
-      construct_plot() %>%
-        gf_theme(theme_bw(base_size = 16))
+      our_theme <- theme_bw(base_size = 16)
+        our_theme$axis.text.x = element_text(angle = 15, hjust = 1)
+      make_point_plot() %>%
+        gf_theme(our_theme)
       })
-    output$little_copy <- renderPlot({
-      construct_plot()
+
+    make_point_plot <- reactive({
+      jitter_h <- jitter_w <- 0
+      This_data = get_sample()
+      if (input$jitter) {
+        if (get_explanatory_type()  != "numeric") jitter_w  = jitter_size()
+        if (get_response_type() != "numeric") jitter_h = jitter_size()
+      }
+      This_data[input$covar] <- get_covar_discrete() # Always discrete
+      if (get_response_type() != "numeric") {
+        This_data[[input$var_y]] <-
+          fct_lump(n=1, factor(This_data[[input$var_y]]))
+      }
+      This_data$response <- as.numeric(This_data[[input$var_y]])
+
+
+      plot_mod_formula <- get_frame_formula()
+      plot_ci_formula  <- get_frame_formula()
+
+      mod_formula <- get_flexible_formula()
+      mod_formula[[2]] <- as.name("response")
+      if (get_response_type() == "numeric"){
+        mod <- lm(mod_formula, data = This_data)
+        This_data <- mod_eval(mod, data = This_data, interval = "confidence")
+      } else {
+        This_data$response <- This_data$response - 1
+        mod <- glm(mod_formula, data = This_data, family = binomial)
+        This_data <- mod_eval(mod, data = This_data, interval = "confidence") %>%
+          mutate(model_output = model_output + 1,
+                 lower = lower + 1,
+                 upper = upper + 1,
+                 response = response + 1)
+      }
+      if (get_explanatory_type() == "numeric") {
+        plot_mod_function <- gf_line
+        plot_ci_function <- gf_errorbar #gf_ribbon
+        plot_mod_formula[[2]] <- (model_output ~ x)[[2]]
+      } else {
+        plot_mod_function <- gf_errorbar
+        plot_ci_function <- gf_errorbar
+        plot_mod_formula[[2]] <- (model_output + model_output ~ x)[[2]]
+      }
+
+      plot_ci_formula[[2]] <- (lower + upper ~ x)[[2]]
+
+      fitted_pos <- extendrange(get_x_range(), f = 0.02)[2]
+      raw_pos <- extendrange(get_x_range(), f = 0.08)[2]
+
+      This_data <- This_data %>%
+        mutate(fitted_pos = fitted_pos,
+               raw_pos = raw_pos,
+               raw = This_data[[input$var_y]])
+      Stats_raw <- df_stats( ~ as.numeric(response), data = This_data, m = mean, s = sd) %>%
+        mutate(top = m + s, bottom = m - s,
+               xpos = raw_pos - (raw_pos - fitted_pos) / 3)
+      Stats_mod <- df_stats( ~ model_output, data = This_data, m = mean, s = sd) %>%
+        mutate(top = m + s, bottom = m - s,
+               xpos = fitted_pos + (raw_pos - fitted_pos) / 3)
+      R_value <- Stats_mod$s / Stats_raw$s
+      df <- length(coef(mod)) - 1
+      numerator <- (nrow(This_data) - 1) - df
+      denominator <- df
+      F_value  <- (numerator / denominator) * (R_value^2 / (1 - R_value^2))
+
+      title <- glue::glue("R = {round(R_value, 2)}; F = {round(F_value, 1)}; Model order = {df}")
+
+      if(! input$show_R) title = ""
+
+      P <- LA_dot_layer(get_frame_formula(), data = This_data,
+                        color = get_color_formula(),
+                        width = jitter_w,
+                        height = jitter_h,
+                        alpha = LA_point_alpha(input_sample_size()),
+                        seed = 101) %>%
+        gf_labs(title = title, x = input$var_x, y = input$var_y)
+      if (input$show_model) {
+        P <- P %>%
+          plot_mod_function(plot_mod_formula, color = get_color_formula(),
+                            width = 0.25, size = 2)
+      }
+      if (input$show_R) {
+        P <- P %>%
+        gf_jitter(model_output ~ fitted_pos, color = "blue", height = 0,
+                  width = (raw_pos - fitted_pos) / 5,
+                  alpha = LA_point_alpha(input_sample_size()) / 2) %>%
+        gf_jitter(raw ~ raw_pos, color = "red", height = 0.02,
+                  width = (raw_pos - fitted_pos) / 5,
+                  alpha = LA_point_alpha(input_sample_size()) / 2) %>%
+        gf_pointrange(m + bottom + top ~ xpos,  data = Stats_raw, color = "red", size = 2) %>%
+        gf_pointrange(m + bottom + top ~ xpos,  data = Stats_mod, color = "blue", size = 2)
+      }
+      ci_color <- get_color_formula()
+      if (is.numeric(get_explanatory_type())) {
+        ci_color = NA
+      }
+
+
+
+      if (input$show_ci) {
+        P <- P %>%
+          plot_ci_function(plot_ci_formula, data = This_data,
+                           alpha = 0.5, #fill = get_color_formula(),
+                           color = ci_color)
+      }
+
+      if (get_response_type() == "numeric") { # can't set scale for categorical variable
+        P <- P %>%
+          gf_lims(y = get_y_range() )  # to keep scale constant across samples
+      }
+
+      add_y_ruler( P, x_range = get_x_range(), ruler = input$yruler )
     })
-    output$rcode <- renderText({
-      HTML(includeHTML("r-commands.html"))
+
+    output$rcode <- renderText({ " "
+      #HTML(includeHTML("r-commands.html"))
     })
-    output$explain <- renderText({
-      HTML(includeHTML("explain.html"))
+    output$explain <- renderText({ " "
+      #HTML(includeHTML("explain.html"))
     })
     output$statistics <- renderText({
       HTML(paste("<pre>",
@@ -113,22 +193,18 @@ SERVER <- function(input, output, session) {
       )
     })
 
-    observe({ # Make vertical jittering on a reasonable scale for numeric variables
-      old_val <- input$jitter_height
-      jitter_amt <- if (req(get_response_type()) == "numeric") {
-        possibilities <- pretty(abs(diff(range(req(get_response_var())))) / 10)
-        possibilities[possibilities > 0][1]
-      } else 1
-
-      if (old_val > jitter_amt) old_val <- 0
-
-      updateNoUiSliderInput(session, "jitter_height", range = c(0, jitter_amt),
-                        value = old_val)
+    #####
+    # New server components
+    #
+    jitter_size <- reactive({
+      pmin(sqrt(nrow(get_sample())/10000), 0.2)
     })
 
     ###############################
     #
     # Standard server components
+    #
+    # Copy this into each little app
     #
     ###############################
 
@@ -465,6 +541,7 @@ SERVER <- function(input, output, session) {
         updateSelectInput
 
     })
+
 
 
 }

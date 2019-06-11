@@ -94,7 +94,7 @@ smoother_plot <- function(plot_formula, model_formula, data,
                              ymax = ruler$ymax,
                              ymid = (ruler$ymin + ruler$ymax) / 2,
                              x = 0.8, stringsAsFactors = FALSE,
-                             label = glue::glue("Top: {signif(ruler$ymax,3)} \nHeight: {height} \nBottom: {signif(ruler$ymin,3)} "))
+                             label = glue::glue("Top: {signif(ruler$ymax,3)} \nDiff: {height} \nBottom: {signif(ruler$ymin,3)} "))
 
     # Gosh! I don't know why I need to  do it this way, in raw ggplot
     P <- P  +
