@@ -1,5 +1,5 @@
 #
-# F and Effect
+# Explaining variation
 #
 
 library(shiny)
