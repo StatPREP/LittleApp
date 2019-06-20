@@ -1,0 +1,34 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+SDSdata::sds_setup()
+```
+
+## Point plots
+
+Traditionally, introductory stats has involved many diverse modes of graphing "data": dot plots, stem-and-leaf plots, box-and-whisker plots, histograms, bar charts, histograms, scatterplots, etc. 
+
+As a rule, these plots are an accomodation to technology limitations when graphs were drawn by hand. For instance, stem-and-leaf plots are easy to make with a typewriter, box-and-whisker plots let you work with a 5-number summary rather than the raw data, and bar charts and histograms work on data reduced to a series of counts.
+
+When graphics are drawn by computers, it's possible to take a much more straightforward approach to plotting data: just use a point plot. (This is also called a "scatterplot," but "scatter" has misleading connotations.)
+
+In a point plot, both the x- and y-axes correspond to variables in the data. Each row becomes a dot. 
+
+When one or both of the variables are categorical, the different levels correspond to discrete positions on the axis. This can lead to the dots lying on top of one another, which unfortunately hides some of the data. But there is a simple solution: jittering. In jittering, we take advantage of the empty space between the categorical levels and displace each dot randomly into that empty space. 
+
+To emphasize the use of jittering, you'll have to check the "jitter categorical variables" in the app's controls.
+
+Another mode for graphics -- the *violin plot* -- can be overlaid on the data. The violin shows the *density* of the y-variable. Of course, you can see the density directly from the point plot, particularly when n is large. The violin chart translates this intuitive notion of density into a metaphor: the width of a bar.  Using large n (by setting the app's control for sample size) will make it obvious what is the relationship between the density of dots and the violin. (But note, when the x-variable is quantitative, it is arbitrarily divided into three levels, with one violin for each. For categorical x variables, there is one violin for each discrete group.)
+
+It's helpful to interpret the axes in a point plot as a response variable versus an explantatory variable. The response variable is always shown on the vertical axis. 
+
+When there are multiple explanatory variables, different graphical modes can be brought into play. In this app we use color and faceting.
+
+Many people wonder how to make a point plot when there is a response variable but *no explanatory variables*. Rather than requiring new graphical forms for this special case, we simply add a variable as a placeholder for the explanatory variable but which consists of a single level -- all the rows fall into one group!
+
+
+
+
+
+
+

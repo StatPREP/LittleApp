@@ -74,8 +74,8 @@ SERVER <- function(input, output, session) {
       jitter_h <- jitter_w <- 0
       This_data = get_sample()
       if (input$jitter) {
-        if (get_explanatory_type()  != "numeric") jitter_w  = 0.2
-        if (get_response_type() != "numeric") jitter_h = 0.2
+        if (get_explanatory_type()  != "numeric") jitter_w  = jitter_size()
+        if (get_response_type() != "numeric") jitter_h = jitter_size()
       }
       This_data[input$covar] <- get_covar_discrete() # Always discrete
       if ("facet_by" %in% names(input)) {
@@ -101,16 +101,23 @@ SERVER <- function(input, output, session) {
     })
 
     output$rcode <- renderText({ " "
-      #HTML(includeHTML("r-commands.html"))
+      HTML(includeHTML("r-commands.html"))
     })
     output$explain <- renderText({ " "
-      #HTML(includeHTML("explain.html"))
+      HTML(includeHTML("explain.html"))
     })
     output$statistics <- renderText({
       HTML(paste("<pre>",
                  paste(capture.output(head(get_sample(), 30)), collapse = "\n"),
                  "</pre>")
       )
+    })
+
+    #####
+    # New server components
+    #
+    jitter_size <- reactive({
+      pmin(sqrt(nrow(get_sample())/10000), 0.2)
     })
 
     ###############################

@@ -1,0 +1,25 @@
+## Basic commands used in this app
+
+```{r include = FALSE}
+SDSdata::sds_setup()
+```
+
+The fundamental command for making a point plot is `gf_point()`, used with a tilde-formula to specify the response and explanatory variables, e.g.
+
+```{r} 
+gf_point(Height ~ Gender, data = NHANES)
+```
+
+For jittering, use `gf_jitter()`. If you do not like the default values for the amount of horizontal and variable, use the `height=` and `width=` arguments. For instance, here the response variable is quantitative, so no vertical jittering should be used, e.g.
+
+```{r}
+gf_jitter(Height ~ Gender, data = NHANES, height = 0)
+```
+
+The default width for jittering is about 0.4, which brings the bands almost half-way to each neighbor. If you don't like this default, set the `width = ` argument to something different.
+
+For a second explanatory variable, you can use color or facetting.  For example:
+
+```{r}
+gf_jitter(Height ~ Gender | HomeOwn, data = NHANES, color = ~ MaritalStatus)
+```
