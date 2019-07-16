@@ -22,13 +22,16 @@ ui <- fluidPage(
         #choose_data_frame_UI("get_data"), sample_size_UI("get_N"),
         br(),
         fillRow(dropdown( select_data_frame_UI("select_frame"),
-                          select_var_UI("response_name", "response", optional = FALSE),
-                          select_var_UI("explanatory_name", "explanatory"),
-                               inputId = "data_button",
-                               size = "sm",
-                               circle = FALSE,
-                               label = "Data & variables"),
-                sample_size_UI("samp_size"),
+                          select_var_UI("response_name", "response var", optional = FALSE),
+                          select_var_UI("explanatory_name", "explanatory var"),
+                          select_var_UI("covar", "second explanatory var", show = FALSE),
+                          select_var_UI("covar2", "third explanatory var", show = FALSE),
+                          sample_size_UI("samp_size"),
+                          inputId = "data_button",
+                          size = "sm",
+                          circle = FALSE,
+                          label = "Data & variables"),
+
                 actionButton("annotations", "Annotations"),
                 prettyToggle("save_plot", label_on = "Dismiss plot",
                              label_off = "Hold plot",
@@ -68,6 +71,12 @@ server <- function(input, output) {
     EXPLANATORY <- callModule(select_var, "explanatory_name",
                            suitable = function(x) is.numeric(x),
                            raw = RAW$get_raw)
+    COVAR <- callModule(select_var, "covar",
+                           suitable = function(x) TRUE,
+                           raw = RAW$get_raw)
+    COVAR2 <- callModule(select_var, "covar2",
+                              suitable = function(x) FALSE,
+                              raw = RAW$get_raw)
     N <- callModule(sample_size, "samp_size", nmax = RAW$max_n)
     observe({
     cat("Selected frame is", RAW$name(), "\n")

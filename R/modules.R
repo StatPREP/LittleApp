@@ -1,9 +1,10 @@
 #' Modules for selecting data
 #'
 #' @export
-select_var_UI <- function(id, label, optional = TRUE) {
+select_var_UI <- function(id, label, optional = TRUE, show = TRUE) {
   ns <- NS(id)
 
+  if (!show) return(NULL)
   selectizeInput(ns("selector"), label = label, choices = NULL,
                  options = list(
                    placeholder = ifelse(optional, "None required", 'Select a variable'),
@@ -30,13 +31,12 @@ select_data_frame_UI <-
            types = c("numeric", "2 levels", NA, NA)) {
     ns <- NS(id)
     tagList(
-      selectInput(ns("frame_name"), "Data source", choices = canned)
-      # ,
-      #             options = list(
-      #               placeholder = 'Select a data frame',
-      #               onInitialize = I('function() { this.setValue(""); }')
-      #             )
-      # )
+      selectizeInput(ns("frame_name"), "Data source", choices = canned,
+                  options = list(
+                    placeholder = 'Select a data frame',
+                    onInitialize = I('function() { this.setValue(""); }')
+                  )
+      )
     )
   }
 #' @export
@@ -57,15 +57,12 @@ select_data_frame <- function(input, output, session, ...) {
 #' @export
 sample_size_UI <- function(id, ...) {
   ns <- NS(id)
+  tagList(
   samp_n <- selectizeInput(ns("samp_n"), "Sample size n",
                         choices = c(5, 10, 20, 50, 100, 200, 500, 1000, 2000),
-                        selected = 50)
+                        selected = 50),
   stratify <- checkboxInput(ns("stratify"), label = "Stratify", value = FALSE)
-  dropdown(samp_n, stratify,
-           size = "sm",
-           inputId = ns("n_button"),
-           circle = FALSE,
-           label = "Sample size")
+  )
 }
 #' @export
 sample_size <- function(input, output, session, nmax) {

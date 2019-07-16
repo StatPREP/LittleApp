@@ -5,8 +5,8 @@ account: dtkaplan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 837275
-bundleId: 2167326
+bundleId: 2167495
 url: https://dtkaplan.shinyapps.io/LA_point_plot/
-when: 1561057409.89315
+when: 1561061311.41717
 asMultiple: FALSE
 asStatic: FALSE
