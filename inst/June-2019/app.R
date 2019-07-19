@@ -17,6 +17,16 @@ Control_menu <-  dropdown(
 )
 Control_menu2 <- NULL # A slot for another control menu if you want it
 
+# When implementing a new app,
+# customize the contents of this function, without changing
+# the calling interface.
+main_plot_function <- function(Sample, vnames, input_values) {
+  gf_jitter(response ~ explanatory, data = Sample,
+            color = "black") %>%
+  gf_labs(y = vnames["response"], x = vnames["explanatory"])
+}
+
+
 # Boilerplate
 Tmp <- select_data_frame_UI("select_frame")
 Data_menu <- Tmp[[1]]
@@ -32,8 +42,8 @@ History_menu <-  dropdown(
     circle = FALSE,
     label = "History",
     width = "180px",
-    checkboxInput("show_both", label = "Show history", value = FALSE),
-    checkboxInput("freeze", label = "Freeze history", value = FALSE)
+    checkboxInput("show_both", "Show frozen", value = FALSE),
+    actionButton("freeze", label = "Freeze plot")
   )
 # Define UI for application that draws a histogram
 ui <-
@@ -77,6 +87,7 @@ server <- function(input, output, session) {
   # Placeholder for the history
   current_plot <- previous_plot <- gf_text(1 ~ 1, label = "No history yet.")
 
+  # Grab parameters from the URL query
   initialized = FALSE
   observe({
     query <- parseQueryString(session$clientData$url_search)
@@ -98,16 +109,19 @@ server <- function(input, output, session) {
   }, priority=1000)
 
 
-  # update the plots as needed
+  # update the saved plot on freeze-button push
   observe({
-    newplot <- make_plot()
+    if (input$freeze > 0) {
+      previous_plot <<- current_plot
+      updateCheckboxInput(session, "show_both", value = TRUE)
+    }
+  })
+  observe({
+    # make the next plot
+    current_plot <<- make_plot()
 
     # Make freeze an action button and copy the current plot whenever it's pressed.
     # This will need to be in a separate observer()
-
-    if (! isolate(input$freeze)) previous_plot <<- current_plot
-    current_plot <<- newplot
-
     output$half_width <- renderPlot({ current_plot })
     output$full_width <- renderPlot({ current_plot })
     output$savedPlot <- renderPlot({previous_plot})
@@ -115,10 +129,16 @@ server <- function(input, output, session) {
 
 
   make_plot <- reactive({
-    tmp <- RAW$get_sample()
+    # Copy over the input values to be able to hand them to the plotting function.
+    input_names <- names(input)
+    input_values <- lapply(input_names, function(nm) input[[nm]]) %>%
+      setNames(input_names)
+
+    Sample <- RAW$get_sample()
     vnames <- RAW$var_names()
-    gf_jitter(response ~ explanatory, data = tmp, color = "black") %>%
-      gf_labs(y = vnames["response"], x = vnames["explanatory"])
+    main_plot_function(Sample, vnames, input_values)
+    # gf_jitter(response ~ explanatory, data = Sample, color = "black") %>%
+    #   gf_labs(y = vnames["response"], x = vnames["explanatory"])
   })
 
   RAW <- callModule(select_data_frame, "select_frame", state = state,

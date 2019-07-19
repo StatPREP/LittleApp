@@ -103,7 +103,7 @@ select_data_frame <- function(input, output, session, state, new_sample,...) {
 
   get_raw <- reactive({
     input$frame_name
-    cat("Accessing raw data\n")
+    #cat("Accessing raw data\n")
     eval(parse(text = input$frame_name))
   })
 
@@ -146,7 +146,7 @@ select_data_frame <- function(input, output, session, state, new_sample,...) {
     req(variables["response"] != "")
     req(input$samp_n)
     new_sample() # for the dependency
-    cat("Getting sample\n")
+
     # Need to add in stratification logic
 
     get_raw()[variables] %>%
