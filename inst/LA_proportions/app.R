@@ -125,16 +125,19 @@ SERVER <- function(input, output, session) {
     if (input$show_ci) {
       P <- P %>% gf_errorbar(lower + upper ~ explan,
                              data = model_vals, color = color_formula,
+                             inherit = FALSE,
                              alpha = ifelse(discrete_explanatory, 0.75, 0.3))
     }
 
     if (discrete_explanatory) {
       P <- P %>% gf_errorbar(model_output + model_output ~ explan,
                              color = color_formula,
+                             inherit = FALSE,
                              data = model_vals)
     } else {
       P <- P %>% gf_line(model_output ~ explan,
                          data = model_vals, size = 2,
+                         inherit = FALSE,
                          color = color_formula, alpha = 0.5)
     }
 

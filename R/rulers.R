@@ -27,6 +27,7 @@ add_y_ruler <- function(P, x_range, ruler = NULL) {
                      x = max(x_range),
                      xend = max(x_range)),
                  color  = "black",
+                 inherit = FALSE,
                  arrow = arrow(ends = "both", length = unit(0.1, "inches"))) +
     geom_label(aes(y = Ruler_info$ymid,
                   x = max(x_range),

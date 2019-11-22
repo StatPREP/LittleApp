@@ -26,6 +26,7 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
                                    color = color_formula,
                                    width = 0.25,
                                    size = 2,
+                                   inherit = FALSE,
                                    show.legend = FALSE))
   }
 
@@ -37,6 +38,7 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
                                    color = color_formula,
                                    width = 0.13,
                                    size = 1.5,
+                                   inherit = FALSE,
                                    show.legend = FALSE))
   }
   if (show_t) {
@@ -58,7 +60,8 @@ two_sample_t_plot <-  function(formula, data, level = 0.95,
              high = pmin(high, y_range[2]))
     P <- P %>%
       gf_errorbar(low + high ~ midpoint, data = T_stats,
-                  width = .3, show.legend = FALSE) %>%
+                  width = .3, show.legend = FALSE,
+                  inherit = FALSE) %>%
       gf_text(high ~ right_of_midpoint, color = "black", label = ~ p_label,
               data = T_stats, vjust = 0)
   }
@@ -130,6 +133,7 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
                                    color = "blue",
                                    width = 0.25,
                                    size = 2,
+                                   inherit = FALSE,
                                    show.legend = FALSE))
   }
 
@@ -151,6 +155,7 @@ one_sample_t_plot <- function (formula, data, level = 0.95,
                                      color = "blue",
                                      width = 0.13,
                                      size = 1.5,
+                                     inherit = FALSE,
                                      show.legend = FALSE)) %>%
       gf_hline(yintercept = null_hypothesis) %>%
       gf_text(top ~ midpoint, color = "black", label = ~ p_label,

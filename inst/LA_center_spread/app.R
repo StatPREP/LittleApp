@@ -130,29 +130,37 @@ SERVER <- function(input, output, session) {
         if (input$violin) P <- P %>% gf_violin(alpha = 0.2, fill = "blue")
         if (input$show_median) {
           this_formula <- as.formula(glue::glue("median + median ~ {input$var_x}"))
-          P <- P %>% gf_errorbar(this_formula, data = Stats, color = "blue", size = 2)
+          P <- P %>% gf_errorbar(this_formula, data = Stats,
+                                 inherit = FALSE, color = "blue", size = 2)
         }
         if (input$show_pred_interval) {
           this_formula <- as.formula(glue::glue("prediction_lower + prediction_upper ~ {input$var_x}"))
-          P <- P %>% gf_errorbar(this_formula, data = Stats, color = "gray", alpha = 0.5,  size = 4)
+          P <- P %>% gf_errorbar(this_formula, data = Stats,
+                                 inherit = FALSE, color = "gray", alpha = 0.5,  size = 4)
         }
         if (input$show_sd) {
           this_formula <- as.formula(glue::glue("`pos_sd` + neg_sd ~ {input$var_x}"))
-          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler, color = "red", width = 0.1)
+          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler,
+                                 inherit = FALSE, color = "red", width = 0.1)
           this_formula <- as.formula(glue::glue("pos_2sd + mean ~ {input$var_x}"))
-          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler, color = "red", width = 0.15)
+          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler,
+                                 inherit = FALSE, color = "red", width = 0.15)
           this_formula <- as.formula(glue::glue("neg_2sd + mean ~ {input$var_x}"))
-          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler, color = "red", width = 0.15)
+          P <- P %>% gf_errorbar(this_formula, data = For_sd_ruler,
+                                 inherit = FALSE, color = "red", width = 0.15)
           this_formula <- as.formula(glue::glue("vertical ~ {input$var_x}"))
-          P <- P %>% gf_text(this_formula, label = ~ label, color = "red",
+          P <- P %>% gf_text(this_formula, label = ~ label,
+                             inherit = FALSE, color = "red",
                              data = For_sd_ruler_labels, nudge_x = 0.1, hjust = 0)
         }
         if (input$show_mean) {
            this_formula <- as.formula(glue::glue("mean + mean ~ {input$var_x}"))
-           P <- P %>% gf_errorbar(this_formula, data = Stats, color = "black", size = 2)
+           P <- P %>% gf_errorbar(this_formula, data = Stats,
+                                  inherit = FALSE, color = "black", size = 2)
            if (input$show_ci) {
              this_formula <- as.formula(glue::glue("mean_lower + mean_upper ~ {input$var_x}"))
-             P <- P %>% gf_errorbar(this_formula, data = Stats, color = "black", size = 1, width = 0.8)
+             P <- P %>% gf_errorbar(this_formula, data = Stats,
+                                    inherit = FALSE, color = "black", size = 1, width = 0.8)
            }
         }
         if (input$var_x == "1")
