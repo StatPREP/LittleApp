@@ -50,17 +50,21 @@ smoother_plot <- function(plot_formula, model_formula, data,
   P <-
     gf_point(plot_formula, data = data, color = color) %>%
     gf_line(as.formula(paste("model_output ~ ", explan_name)),
-            data = mod_fun_data, color = color) %>%
+            data = mod_fun_data, color = color,
+            inherit = FALSE) %>%
     gf_theme(legend.position = "top")
 
   P <- P %>%
     gf_errorbar(model_output + model_output ~ x_mod_vals, data = mod_vals,
-                width = 1*ebar_width, color = color, alpha = 0.25) %>%
+                width = 1*ebar_width, color = color, alpha = 0.25,
+                inherit = FALSE) %>%
     gf_errorbar(raw + raw ~ x_raw_vals, data = mod_vals,
-                width = 1*ebar_width, color = "red", alpha = 0.25)
+                width = 1*ebar_width, color = "red", alpha = 0.25,
+                inherit = FALSE)
   P <- P %>%
     gf_errorbar(base + top ~ x, data = std_bars,
-                width = ebar_width/2, size = 1.5, color = I(c("blue", "black")), alpha = 1.0)
+                width = ebar_width/2, size = 1.5, color = I(c("blue", "black")),
+                alpha = 1.0, inherit = FALSE)
 
   # # confidence bands
   # # gf_ribbon() not working for some unknown reason.
