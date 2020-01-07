@@ -1,7 +1,7 @@
 Package: LittleApp
 Type: Package
 Title: Support for writing a Little App
-Version: 0.2.1
+Version: 0.3.0
 Author: Daniel Kaplan
 Maintainer: Daniel Kaplan <kaplan@macalester.edu>
 Description: Provides utilities and data for Little Apps, including a Shiny framework.
@@ -10,7 +10,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
-Requires: shiny
+Requires: shiny, dplyr, magrittr,  ggplot2
 Imports: 
     rlang,
     tibble,
