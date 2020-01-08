@@ -25,10 +25,18 @@
 
 make_model_plots <- function(formula, data,
                        show_model = TRUE,
-                       sd  =  TRUE, R2 = TRUE,
-                       F = TRUE) {
+                       sd  =  TRUE, R2 = FALSE,
+                       F = FALSE) {
   response <- data[[formula[[2]]]]
   response_name <- as.character(formula[[2]])
+  top  <- NULL # a flag
+  if (length(unique(response))==2) {
+        levels = as.character(unique(response))
+        top = levels[2]
+        bottom = levels[1]
+        response <- as.numeric(response == top)
+        data[[response_name]] <- response
+      }
 
   explanatory_vars <- all.vars(formula[[3]])
 
@@ -50,16 +58,29 @@ make_model_plots <- function(formula, data,
   color_formula <-
     if  (is.null(covariate)) "black"
   else as.formula(paste("~", covariate_name))
+  alpha <- LA_point_alpha(nrow(data))
   P1 <-
-    if  (is.numeric(explanatory)) {
+    if  (is.numeric(explanatory) &&
+         length(unique(explanatory)) == 2 ) {
       gf_point(plot_formula, data  = data,
-               color  = color_formula, alpha = 0.2)
+               color  = color_formula, alpha = alpha)
     } else {
       gf_jitter(plot_formula,  data = data,
                 color  = color_formula,
-                alpha = 0.2,  width  =  0.2)
+                alpha = alpha,
+                width  =  0.2, height = 0.1)
     }
-  P1 <-
+  if (!is.null(top)) {
+    # format the  y  scale nicely  for a dicotomous
+    # variable
+    P1 <- P1 %>%
+      gf_refine(
+      scale_y_continuous(
+        response_name, breaks  =  c(0, .25, .5, .75, 1),
+        labels = c(bottom, .25,  .5, .75, top),
+        limits = c(-.1, 1.1)))
+  }
+
     if (show_model) {
       color_formula <-
         if  (is.null(covariate)) "blue"
@@ -68,13 +89,13 @@ make_model_plots <- function(formula, data,
         mod_plot_formula <-
           as.formula(paste("model_output ~",
                            explanatory_name))
-        P1 %>%
+        P1  <- P1 %>%
           gf_line(mod_plot_formula, data  = data,
                   color = color_formula)
       } else {
         mod_plot_formula <-
           as.formula(paste("model_output  + model_output ~",  explanatory_name))
-        P1 %>%
+        P1 <- P1 %>%
           gf_errorbar(mod_plot_formula,
                       data = data,
                       color  =  color_formula)
@@ -91,6 +112,8 @@ make_model_plots <- function(formula, data,
                     R2 = R2,
                     F = F,
                     sd = sd)
+  if (!is.null(top))
+    P2$P <- P2$P  %>% gf_lims(y  = c(-.1, 1.1))
 
   list(P1 = P1 %>% gf_theme(legend.position  =  "left"),
        P2  = P2,

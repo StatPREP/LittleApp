@@ -4,7 +4,7 @@
 \alias{side_plot_R}
 \title{Graphics for the 2020 revisions of Little Apps}
 \usage{
-side_plot_R(raw, fitted, explan = "bogus", df = 1, violin = FALSE,
+side_plot_R(raw, fitted, explan = "bogus", dflex = 1, violin = FALSE,
   R2 = TRUE, F = TRUE, sd = TRUE)
 }
 \arguments{

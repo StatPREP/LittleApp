@@ -5,7 +5,7 @@
 \title{Make the basic plots}
 \usage{
 make_model_plots(formula, data, show_model = TRUE, sd = TRUE,
-  R2 = TRUE, F = TRUE)
+  R2 = FALSE, F = FALSE)
 }
 \arguments{
 \item{formula}{of form A ~ B or A ~ B + C. You can also
@@ -39,5 +39,5 @@ of raw to  model values
 }
 }
 \examples{
-make_model_plots(wage ~ splines::ns(educ, 4),  data = mosaicData::CPS85)
+make_model_plots(wage ~ splines::ns(educ, 2)*sex,  data = mosaicData::CPS85)
 }

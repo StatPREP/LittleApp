@@ -21,7 +21,7 @@
 #' @import ggformula
 #' @import dplyr
 #' @export
-side_plot_R <- function(raw, fitted, explan = "bogus", df = 1,
+side_plot_R <- function(raw, fitted, explan = "bogus", dflex = 1,
                         violin = FALSE,
                         R2 = TRUE,
                         F = TRUE,
@@ -62,15 +62,18 @@ side_plot_R <- function(raw, fitted, explan = "bogus", df = 1,
     ggformula::gf_point(m ~ source, data = Stats, color = "black",
              inherit = FALSE)
   label <- ""
+  Rlabel <- paste0("R=", signif(sqrt(R2val), 2),
+                   "\nR^2=", signif(R2val, 2), "\n")
   if (R2) {
-    label <- paste0("R=", signif(sqrt(R2val), 2),
-                    "\nR^2=", signif(R2val, 2), "\n")
+    label <- Rlabel
   }
+  Fval <- ((length(raw) - dflex)/ dflex) * (R2val / (1 - R2val))
+  Flabel <- paste("n=", length(raw),
+                  "\ndflex=",  dflex, "\nF=",
+                  signif(Fval, 2) )
+  Rlabel <- paste(Rlabel,  Flabel)
   if (F) {
-    Fval <- ((length(raw) - df)/ df) * (R2val / (1 - R2val))
-    label <- paste(label, "n=", length(raw),
-                   "\ndflex=",  df, "\nF=",
-                   signif(Fval, 2) )
+    label <- paste(label,  Flabel)
   }
   if (F || R2) {
   P <- P %>%
@@ -81,10 +84,23 @@ side_plot_R <- function(raw, fitted, explan = "bogus", df = 1,
              hjust  = 1,
              alpha  = 0.2)
   }
-  P %>% ggformula::gf_labs(x = "", y = "") %>%
+  Label <- gf_label(1 ~ 1, label =  Rlabel) %>%
+    gf_theme(axis.ticks = element_blank(),
+             axis.text = element_blank(),
+             axis.title = element_blank(),
+             panel.border = element_blank(),
+             panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(),
+             panel.background = element_rect(color = NA))
+
+  P  <-
+    P %>% ggformula::gf_labs(x = "", y = "") %>%
     ggformula::gf_theme(axis.ticks.x = element_blank(),
              axis.text.y = element_blank(),
              legend.pos = "none") %>%
     ggformula::gf_refine(scale_colour_manual(
       values = c("blue", "black")))
+  return(list(P = P, label=Label, stats =
+                list(R2=R2val, n=length(raw), dflex=dflex)))
+
 }
